@@ -2,40 +2,40 @@
 #include <mongocxx/instance.hpp>
     
 
-class MongoConnection {
+class MongoDB {
 
 private:
   mongocxx::instance mongodb_instance{}; // This should be done only once.
   mongocxx::client client;
   mongocxx::database db; 
-  mongocxx::collection collection;
 
-  MongoConnection() {
+  MongoDB() {
     mongocxx::uri uri("mongodb://localhost:27017");
     client = mongocxx::client(uri);
     db = client["test"];
-    collection = db["my_test"];
   };
 
-  static MongoConnection* _inst;
+  static MongoDB* _inst;
 
 public:
 
-  static MongoConnection* get_instance() {
+  static MongoDB* connection() {
     if (!_inst)
-          _inst = new MongoConnection ();
+          _inst = new MongoDB ();
     return _inst;
   }
 
-  ~MongoConnection() {
-    if( NULL != MongoConnection::_inst ) {
-      delete MongoConnection::_inst;
+  ~MongoDB() {
+    if( NULL != MongoDB::_inst ) {
+      delete MongoDB::_inst;
     }
   }
+  
+  mongocxx::collection collection(std::string name);
 
   void insert_weight(std::string id, float weight, char* date);
   bsoncxx::stdx::optional<bsoncxx::document::value> find_weight(std::string date);
   bool weight_exists(std::string date);
-  void print_collection();
+  void print_collection(std::string name);
 };
 

@@ -19,18 +19,22 @@ using bsoncxx::builder::stream::finalize;
 using bsoncxx::builder::stream::open_array;
 using bsoncxx::builder::stream::open_document;
 
-#include "mongo_connection.hpp"
+#include "mongo_db.hpp"
 
-MongoConnection* MongoConnection::_inst = 0;
+MongoDB* MongoDB::_inst = 0;
 
-void MongoConnection::print_collection() {
-  mongocxx::cursor cursor = this->collection.find({});
+mongocxx::collection MongoDB::collection(std::string name) {
+  return db[name];
+}
+
+void MongoDB::print_collection(std::string name) {
+  mongocxx::cursor cursor = collection(name).find({});
   for(auto doc : cursor) {
     std::cout << bsoncxx::to_json(doc) << "\n";
   }
 }
 
-void MongoConnection::insert_weight(std::string id, float weight, char* date) {
+void MongoDB::insert_weight(std::string id, float weight, char* date) {
   auto builder = bsoncxx::builder::stream::document{};
 
   bsoncxx::document::value doc_value = builder
@@ -40,22 +44,24 @@ void MongoConnection::insert_weight(std::string id, float weight, char* date) {
     << "weight" << weight
     << bsoncxx::builder::stream::finalize;
 
-  bsoncxx::stdx::optional<mongocxx::result::insert_one> result = this->collection.insert_one(doc_value.view());
+  auto coll = collection("weights");
+  bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc_value.view());
 } 
 
-bsoncxx::stdx::optional<bsoncxx::document::value> MongoConnection::find_weight(std::string date) {
+bsoncxx::stdx::optional<bsoncxx::document::value> MongoDB::find_weight(std::string date) {
   bsoncxx::document::value query = document{} 
     << "date"   << date
     << bsoncxx::builder::stream::finalize;
 
-  bsoncxx::stdx::optional<bsoncxx::document::value> result = collection.find_one(query.view());
+  auto coll = collection("weights");
+  bsoncxx::stdx::optional<bsoncxx::document::value> result = coll.find_one(query.view());
   return result;
-}
+} 
 
-bool MongoConnection::weight_exists(std::string date) {
+bool MongoDB::weight_exists(std::string date) {
   auto result = find_weight(date);
   if(result) {
-    std::cout << bsoncxx::to_json(*result) << "\n";
+    // std::cout << bsoncxx::to_json(*result) << "\n";
     return true;
   }
   else {
