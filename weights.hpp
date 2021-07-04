@@ -1,5 +1,8 @@
+#pragma once
+
 #include <vector>
 #include "json.hpp"
+#include "models/weight.hpp"
 
 class Weights {
 public:
@@ -10,5 +13,5 @@ private:
   void read_files();
   void store_to_mongo();
 
-  std::vector<nlohmann::json> weight_data;
+  std::vector<Weight> weight_data;
 };

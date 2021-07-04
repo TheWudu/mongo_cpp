@@ -1,6 +1,9 @@
+#pragma once
+
 #include <mongocxx/client.hpp>
 #include <mongocxx/instance.hpp>
-    
+
+#include "models/weight.hpp"    
 
 class MongoDB {
 
@@ -33,9 +36,11 @@ public:
   
   mongocxx::collection collection(std::string name);
 
-  void insert_weight(std::string id, float weight, char* date);
-  bsoncxx::stdx::optional<bsoncxx::document::value> find_weight(std::string date);
-  bool weight_exists(std::string date);
+  void insert_weight(std::string id, float weight, bsoncxx::types::b_date date);
+  void insert_weight(Weight weight);
+  bsoncxx::stdx::optional<bsoncxx::document::value> find_weight(std::string id);
+  bool weight_exists(std::string id);
+
   void print_collection(std::string name);
 };
 
