@@ -1,15 +1,20 @@
 #pragma once
 
-class Weight {
+#include <string>
 
-public:
+namespace Models {
+  class Weight {
 
-  std::string id;
-  time_t      date;
-  float       weight; 
+  public:
 
-  Weight(std::string id, time_t date, float weight);
+    std::string id;
+    time_t      date;
+    float       weight; 
 
-  void print();
-  std::string time_str(time_t time);
-};
+    Weight() {};
+    Weight(std::string id, time_t date, float weight);
+
+    void print();
+    std::string time_str(time_t time);
+  };
+}

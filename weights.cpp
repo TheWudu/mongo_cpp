@@ -1,6 +1,6 @@
 #include "weights.hpp"
 #include "mongo_db.hpp"
-#include "json.hpp"
+#include "ext/json.hpp"
 #include "file_list.hpp"
 #include "json_parser.hpp"
 
@@ -12,7 +12,7 @@ using json = nlohmann::json;
 //   return (a["start_time"] < b["start_time"]); 
 // }
 
-bool weight_sort (Weight a, Weight b) { 
+bool weight_sort (Models::Weight a, Models::Weight b) { 
   return (a.date < b.date); 
 }
 
@@ -45,7 +45,7 @@ void Weights::read_files() {
     int64_t timestamp = data["start_time"];
     std::time_t time = timestamp / 1000;
 
-    Weight w = Weight(id, time, weight);
+    Models::Weight w = Models::Weight(id, time, weight);
     w.print();
 
     this->weight_data.push_back(w);

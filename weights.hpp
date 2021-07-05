@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include "json.hpp"
 #include "models/weight.hpp"
 
 class Weights {
@@ -13,5 +12,5 @@ private:
   void read_files();
   void store_to_mongo();
 
-  std::vector<Weight> weight_data;
+  std::vector<Models::Weight> weight_data;
 };

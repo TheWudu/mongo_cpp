@@ -2,6 +2,7 @@
 
 #include "weight.hpp"
 
+namespace Models {
   Weight::Weight(std::string id, time_t date, float weight) {
     this->id = id;
     this->date = date;
@@ -20,4 +21,4 @@
 
     return std::string { buf };
   }
-
+}
