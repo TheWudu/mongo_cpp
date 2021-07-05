@@ -24,7 +24,7 @@ public:
 
   static MongoDB* connection() {
     if (!_inst)
-          _inst = new MongoDB ();
+      _inst = new MongoDB ();
     return _inst;
   }
 
@@ -38,8 +38,8 @@ public:
 
   void insert_weight(std::string id, float weight, bsoncxx::types::b_date date);
   void insert_weight(Models::Weight weight);
-  //bsoncxx::stdx::optional<bsoncxx::document::value> find_weight(std::string id);
-  Models::Weight find_weight(std::string id);
+
+  bool find_weight(std::string id, Models::Weight* weight);
   bool weight_exists(std::string id);
 
   void print_collection(std::string name);

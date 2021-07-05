@@ -8,10 +8,6 @@
 
 using json = nlohmann::json;
 
-// bool weight_sort (json a,json b) { 
-//   return (a["start_time"] < b["start_time"]); 
-// }
-
 bool weight_sort (Models::Weight a, Models::Weight b) { 
   return (a.date < b.date); 
 }
@@ -46,7 +42,7 @@ void Weights::read_files() {
     std::time_t time = timestamp / 1000;
 
     Models::Weight w = Models::Weight(id, time, weight);
-    w.print();
+    // w.print();
 
     this->weight_data.push_back(w);
   }

@@ -65,35 +65,34 @@ void MongoDB::insert_weight(Models::Weight weight) {
   bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc_value.view());
 }
 
-Models::Weight MongoDB::find_weight(std::string id) {
+bool MongoDB::find_weight(std::string id, Models::Weight* weight) {
   bsoncxx::document::value query = document{} 
     << "id"   << id
     << bsoncxx::builder::stream::finalize;
 
   auto coll = collection("weights");
   bsoncxx::stdx::optional<bsoncxx::document::value> result = coll.find_one(query.view());
-  auto data = result->view();
-  std::string i = data["id"].get_utf8().value.to_string();
-  //float w = data["weight"];
-  //time_t t = data["date"];
+ 
+  if(!result) { 
+    return false;
+  }
+  else {
+    auto data = result->view();
+    std::string i = data["id"].get_utf8().value.to_string();
+    float w = data["weight"].get_double().value;
+    int64_t ms = (data["date"].get_date().value).count();
+    time_t t =  ms / 1000;
   
-  std::cout << i << std::endl;
-  // Models::Weight weight = Models::Weight(i, t, w);
-
-  //weight.print();
-  Models::Weight weight; 
-  return weight;
+    *weight = Models::Weight(i, t, w);
+    return true;
+  }
 }
 
 bool MongoDB::weight_exists(std::string id) {
-  auto result = find_weight(id);
-  if(result.id.size() > 0 ) {
-    // std::cout << bsoncxx::to_json(*result) << "\n";
-    return true;
-  }
-  else {
-    return false;
-  }
+  Models::Weight weight;
+  bool exists = find_weight(id, &weight);
+  weight.print();
+  return exists;
 }
 
 
