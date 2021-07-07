@@ -13,14 +13,6 @@ bool weight_sort (Models::Weight a, Models::Weight b) {
   return (a.date < b.date); 
 }
 
-std::string time_str(time_t time) {
-  char buf[19];
-  struct tm * timeinfo = localtime(&time);
-  strftime(buf, sizeof(buf), "%Y-%m-%dT%H-%MZ", timeinfo);
-
-  return std::string { buf };
-}
-  
 void UseCase::WeightImport::import() {
     read_files();
     store_to_mongo();
@@ -43,7 +35,6 @@ void UseCase::WeightImport::read_files() {
     std::time_t time = timestamp / 1000;
 
     Models::Weight w = Models::Weight(id, time, weight);
-    // w.print();
 
     this->weight_data.push_back(w);
   }

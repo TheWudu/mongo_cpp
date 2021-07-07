@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "../helper/time_converter.hpp"
 #include "weight.hpp"
 
 namespace Models {
@@ -11,14 +12,7 @@ namespace Models {
 
   void Weight::print() {
     std::cout << "id: " << this->id 
-      << " - " << time_str(this->date) << " - " << this->weight << "\n";
+      << " - " << Helper::TimeConverter::time_to_string(this->date) << " - " << this->weight << "\n";
   }
 
-  std::string Weight::time_str(time_t time) {
-    char buf[19];
-    struct tm * timeinfo = localtime(&time);
-    strftime(buf, sizeof(buf), "%Y-%m-%dT%H-%MZ", timeinfo);
-
-    return std::string { buf };
-  }
 }

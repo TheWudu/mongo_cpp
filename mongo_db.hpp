@@ -40,7 +40,8 @@ public:
   void insert(Models::Weight weight);
   void insert(Models::RunSession rs);
 
-  bool find_weight(std::string id, Models::Weight* weight);
+  bool find(std::string id, Models::Weight* weight);
+  bool find(std::string id, Models::RunSession* run_session);
 
   bool exists(std::string colname, std::string id);
 

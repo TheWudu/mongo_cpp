@@ -8,7 +8,7 @@ CC = g++
 CFLAGS= -g -Wall --std=c++17
 MONGOFLAGS=$(shell pkg-config --cflags --libs libmongocxx)
 
-FILES = mongo_db.cpp use_case/weight_import.cpp use_case/run_session_import.cpp file_list.cpp json_parser.cpp models/weight.cpp models/run_session.cpp main.cpp
+FILES = mongo_db.cpp use_case/weight_import.cpp use_case/run_session_import.cpp file_list.cpp json_parser.cpp models/weight.cpp models/run_session.cpp helper/time_converter.cpp use_case/run_session_show.cpp main.cpp
 
 # The build target 
 TARGET = run

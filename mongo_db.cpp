@@ -79,7 +79,7 @@ void MongoDB::insert(Models::RunSession rs) {
 }
 
 
-bool MongoDB::find_weight(std::string id, Models::Weight* weight) {
+bool MongoDB::find(std::string id, Models::Weight* weight) {
   bsoncxx::document::value query = document{} 
     << "id"   << id
     << bsoncxx::builder::stream::finalize;
@@ -98,6 +98,33 @@ bool MongoDB::find_weight(std::string id, Models::Weight* weight) {
     time_t t =  ms / 1000;
   
     *weight = Models::Weight(i, t, w);
+    return true;
+  }
+}
+
+bool MongoDB::find(std::string id, Models::RunSession* rs) {
+  bsoncxx::document::value query = document{} 
+    << "id"   << id
+    << bsoncxx::builder::stream::finalize;
+
+  auto coll = collection("run_sessions");
+  bsoncxx::stdx::optional<bsoncxx::document::value> result = coll.find_one(query.view());
+ 
+  if(!result) { 
+    return false;
+  }
+  else {
+    auto data = result->view();
+    std::string i = data["id"].get_utf8().value.to_string();
+    int64_t ms = (data["start_time"].get_date().value).count();
+    rs->start_time =  ms / 1000;
+    ms = (data["end_time"].get_date().value).count();
+    rs->end_time =  ms / 1000;
+    rs->distance = data["distance"].get_int32().value;
+    rs->duration = data["duration"].get_int32().value;
+    rs->notes    = data["notes"].get_utf8().value.to_string();
+    rs->sport_type_id = data["sport_type_id"].get_int32().value;
+  
     return true;
   }
 }

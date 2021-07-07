@@ -19,6 +19,5 @@ namespace Models {
     RunSession() {};
 
     void print();
-    std::string time_str(time_t time);
   };
 }
