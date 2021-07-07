@@ -34,21 +34,7 @@ void MongoDB::print_collection(std::string name) {
   }
 }
 
-void MongoDB::insert_weight(std::string id, float weight, bsoncxx::types::b_date date) {
-  auto builder = bsoncxx::builder::stream::document{};
-
-  bsoncxx::document::value doc_value = builder
-    << "id"   << id
-    << "type" << "weight"
-    << "date" << date
-    << "weight" << weight
-    << bsoncxx::builder::stream::finalize;
-
-  auto coll = collection("weights");
-  bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc_value.view());
-} 
-
-void MongoDB::insert_weight(Models::Weight weight) {
+void MongoDB::insert(Models::Weight weight) {
   auto builder = bsoncxx::builder::stream::document{};
 
   std::chrono::system_clock::time_point tp = std::chrono::system_clock::from_time_t(weight.date);
@@ -74,19 +60,22 @@ bsoncxx::types::b_date time_t_to_b_date(time_t time) {
 void MongoDB::insert(Models::RunSession rs) {
   auto builder = bsoncxx::builder::stream::document{};
 
-  bsoncxx::document::value doc_value = builder
+  auto doc_value = builder
     << "id"   << rs.id
     << "start_time" << time_t_to_b_date(rs.start_time)
     << "end_time" << time_t_to_b_date(rs.end_time)
     << "start_time_timezone_offset" << rs.start_time_timezone_offset
     << "distance" << rs.distance
     << "duration" << rs.duration
-    << "sport_type_id" << rs.sport_type_id
-    << "notes" << rs.notes
-    << bsoncxx::builder::stream::finalize;
+    << "sport_type_id" << rs.sport_type_id;
+  
+  if(rs.notes.size() > 0) {
+    doc_value << "notes" << rs.notes;
+  }
+  auto doc = doc_value << bsoncxx::builder::stream::finalize;
 
   auto coll = collection("run_sessions");
-  bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc_value.view());
+  bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc.view());
 }
 
 
@@ -111,12 +100,6 @@ bool MongoDB::find_weight(std::string id, Models::Weight* weight) {
     *weight = Models::Weight(i, t, w);
     return true;
   }
-}
-
-bool MongoDB::weight_exists(std::string id) {
-  Models::Weight weight;
-  bool exists = find_weight(id, &weight);
-  return exists;
 }
 
 bool MongoDB::exists(std::string colname, std::string id) {

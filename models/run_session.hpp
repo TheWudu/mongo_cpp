@@ -10,10 +10,10 @@ namespace Models {
     std::string id;
     time_t      start_time;
     time_t      end_time;
-    int64_t     start_time_timezone_offset;
-    int64_t     distance;
-    int64_t     duration;
-    int64_t     sport_type_id;
+    int32_t     start_time_timezone_offset;
+    int32_t     distance;
+    int32_t     duration;
+    int32_t     sport_type_id;
     std::string notes;
 
     RunSession() {};

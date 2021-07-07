@@ -37,12 +37,10 @@ public:
   
   mongocxx::collection collection(std::string name);
 
-  void insert_weight(std::string id, float weight, bsoncxx::types::b_date date);
-  void insert_weight(Models::Weight weight);
+  void insert(Models::Weight weight);
   void insert(Models::RunSession rs);
 
   bool find_weight(std::string id, Models::Weight* weight);
-  bool weight_exists(std::string id);
 
   bool exists(std::string colname, std::string id);
 

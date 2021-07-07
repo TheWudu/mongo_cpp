@@ -57,8 +57,8 @@ void UseCase::WeightImport::store_to_mongo() {
   int fcnt = 0;
 
   for(auto weight = this->weight_data.begin(); weight != this->weight_data.end(); weight++) {
-    if (mc->weight_exists(weight->id) == false) {
-      mc->insert_weight(*weight);
+    if (mc->exists("weights", weight->id) == false) {
+      mc->insert(*weight);
       icnt++;
     } else {
       fcnt++;
