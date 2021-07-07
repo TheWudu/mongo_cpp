@@ -15,7 +15,9 @@ std::vector<std::string> FileList::files() {
   std::vector<std::string> list;
 
   for (const auto & entry : fs::directory_iterator(path)) {
-    list.push_back(entry.path());
+    if(entry.is_regular_file()) {
+      list.push_back(entry.path());
+    }
   }
 
   return list;

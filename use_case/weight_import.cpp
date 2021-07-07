@@ -1,10 +1,11 @@
-#include "weights.hpp"
-#include "mongo_db.hpp"
-#include "ext/json.hpp"
-#include "file_list.hpp"
-#include "json_parser.hpp"
+#include "weight_import.hpp"
 
-#include "models/weight.hpp"
+#include "../ext/json.hpp"
+#include "../mongo_db.hpp"
+#include "../file_list.hpp"
+#include "../json_parser.hpp"
+
+#include "../models/weight.hpp"
 
 using json = nlohmann::json;
 
@@ -20,12 +21,12 @@ std::string time_str(time_t time) {
   return std::string { buf };
 }
   
-void Weights::import_weights() {
+void UseCase::WeightImport::import() {
     read_files();
     store_to_mongo();
 }
 
-void Weights::read_files() {
+void UseCase::WeightImport::read_files() {
   FileList file_list = FileList("data/Weight");
 
   std::vector<std::string> files = file_list.files();
@@ -50,7 +51,7 @@ void Weights::read_files() {
   sort(this->weight_data.begin(), this->weight_data.end(), weight_sort);
 }
 
-void Weights::store_to_mongo() {
+void UseCase::WeightImport::store_to_mongo() {
   MongoDB* mc = MongoDB::connection();
   int icnt = 0;
   int fcnt = 0;

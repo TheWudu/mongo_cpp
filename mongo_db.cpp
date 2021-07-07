@@ -64,6 +64,31 @@ void MongoDB::insert_weight(Models::Weight weight) {
   auto coll = collection("weights");
   bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc_value.view());
 }
+  
+bsoncxx::types::b_date time_t_to_b_date(time_t time) {
+  std::chrono::system_clock::time_point tp = std::chrono::system_clock::from_time_t(time);
+  bsoncxx::types::b_date timedate = bsoncxx::types::b_date { tp };
+  return timedate;
+}
+
+void MongoDB::insert(Models::RunSession rs) {
+  auto builder = bsoncxx::builder::stream::document{};
+
+  bsoncxx::document::value doc_value = builder
+    << "id"   << rs.id
+    << "start_time" << time_t_to_b_date(rs.start_time)
+    << "end_time" << time_t_to_b_date(rs.end_time)
+    << "start_time_timezone_offset" << rs.start_time_timezone_offset
+    << "distance" << rs.distance
+    << "duration" << rs.duration
+    << "sport_type_id" << rs.sport_type_id
+    << "notes" << rs.notes
+    << bsoncxx::builder::stream::finalize;
+
+  auto coll = collection("run_sessions");
+  bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc_value.view());
+}
+
 
 bool MongoDB::find_weight(std::string id, Models::Weight* weight) {
   bsoncxx::document::value query = document{} 
@@ -91,8 +116,21 @@ bool MongoDB::find_weight(std::string id, Models::Weight* weight) {
 bool MongoDB::weight_exists(std::string id) {
   Models::Weight weight;
   bool exists = find_weight(id, &weight);
-  weight.print();
   return exists;
 }
 
+bool MongoDB::exists(std::string colname, std::string id) {
+  bsoncxx::document::value query = document{} 
+    << "id"   << id
+    << bsoncxx::builder::stream::finalize;
 
+  auto coll = collection(colname);
+  int64_t count = coll.count_documents(query.view());
+ 
+  if(count == 1) { 
+    return true;
+  }
+  else {
+      return false;
+  }
+}
