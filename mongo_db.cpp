@@ -10,7 +10,13 @@
 #include <bsoncxx/builder/stream/helpers.hpp>
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/builder/stream/array.hpp>
+#include <bsoncxx/builder/basic/array.hpp>
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/string/to_string.hpp>
+#include <mongocxx/exception/exception.hpp>
+#include <mongocxx/exception/logic_error.hpp>
 
+using namespace mongocxx;
 
 using bsoncxx::builder::stream::close_array;
 using bsoncxx::builder::stream::close_document;
@@ -142,5 +148,54 @@ bool MongoDB::exists(std::string colname, std::string id) {
   }
   else {
       return false;
+  }
+}
+
+void MongoDB::aggregate_stats() {
+  using namespace bsoncxx::builder::basic;
+
+  mongocxx::pipeline p{};
+
+/* 
+  db.run_sessions.aggregate([ 
+    { $match: { "sport_type_id": { $in: [1,3,4,19] }, "start_time": { $gt: ISODate("2021-04-01"), $lt: ISODate("2022-01-01") } } }, 
+    { $group: { _id: "$sport_type_id", overall_distance: { $sum: "$distance" }, overall_duration: { $sum: "$duration" }, overall_count: { $sum: 1 } } }, 
+    { $project: { overall_distance: "$overall_distance", overall_duration: "$overall_duration", overall_count: "$overall_count", avg_distance: { $divide: [ "$overall_distance", "$overall_count" ] }, average_pace: { $divide: [ "$overall_duration", "$overall_distance"] } } } 
+  ]
+*/
+
+  /*
+    sport_types: 
+      1 .. running,
+      3 .. cycling,
+      7 .. hiking,
+      9 .. skiing,
+     19 .. walking
+     26 .. yoga,
+     31 .. pilates,
+     32 .. climbing,
+     54 .. ice-skating,
+     55 .. sledding,
+     69 .. crossfit,
+     70 .. dancing,
+     71 .. ice-hokey,
+     74 .. gymnastics
+  */
+  p.match(make_document(kvp("sport_type_id", make_document(kvp("$in", make_array(1,19,7))))));
+  p.group(make_document(kvp("_id", "$sport_type_id"), 
+                        kvp("overall_distance", make_document(kvp("$sum", "$distance"))),
+                        kvp("overall_duration", make_document(kvp("$sum", "$duration"))),
+                        kvp("overall_count", make_document(kvp("$sum", 1)))
+          ));
+  p.project(make_document(kvp("overall_distance", "$overall_distance"),
+                          kvp("overall_duration", "$overall_duration"),
+                          kvp("overall_count", "$overall_count"),
+                          kvp("average_distance", make_document(kvp("$divide", make_array("$overall_distance","$overall_count")))),
+                          kvp("average_pace", make_document(kvp("$divide", make_array("$overall_duration","$overall_distance"))))
+  ));
+
+  auto cursor = collection("run_sessions").aggregate(p, mongocxx::options::aggregate{});
+  for(auto doc : cursor) {
+    std::cout << bsoncxx::to_json(doc) << "\n";
   }
 }

@@ -45,6 +45,7 @@ public:
 
   bool exists(std::string colname, std::string id);
 
+  void aggregate_stats();
   void print_collection(std::string name);
 };
 
