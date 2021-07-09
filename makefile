@@ -8,17 +8,33 @@ CC = g++
 CFLAGS= -g -Wall --std=c++17
 MONGOFLAGS=$(shell pkg-config --cflags --libs libmongocxx)
 
-FILES = mongo_db.cpp use_case/weight_import.cpp use_case/run_session_import.cpp file_list.cpp json_parser.cpp models/weight.cpp models/run_session.cpp helper/time_converter.cpp use_case/run_session_show.cpp main.cpp
+SRC = mongo_db.cpp helper/time_converter.cpp main.cpp
+
+MODEL_SRC = models/weight.cpp models/run_session.cpp
+
+models_o: $(MODEL_SRC)
+	$(CC) $(CFLAGS) -c $(MODEL_SRC) 
+
+
+JSON_SRC = file_list.cpp json_parser.cpp
+
+json_o: $(JSON_SRC)
+	$(CC) $(CFLAGS) -c $(JSON_SRC) 
+
+USE_CASE_SRC = use_case/run_session_import.cpp use_case/run_session_show.cpp use_case/weight_import.cpp
+
+use_case_o: $(USE_CASE_SRC)
+	$(CC) $(CFLAGS) $(MONGOFLAGS) -c $(USE_CASE_SRC)
 
 # The build target 
 TARGET = run
 
-build: $(TARGET)
+all: json_o models_o use_case_o $(TARGET)
 
-$(TARGET): $(FILES)
-	$(CC) $(FILES) $(CFLAGS) $(MONGOFLAGS) -o $(TARGET) 
+$(TARGET): $(SRC) models_o json_o use_case_o
+	$(CC) $(SRC) $(CFLAGS) $(MONGOFLAGS) *.o -o $(TARGET) 
 
 clean:
-	$(RM) $(TARGET) *.o
+	$(RM) $(TARGET) *.o 
 
-rebuild: clean build 
+rebuild: clean all
