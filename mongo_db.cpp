@@ -123,7 +123,7 @@ bool MongoDB::find(std::string id, Models::Session* rs) {
     // std::cout << bsoncxx::to_json(result->view()) << "\n";
 
     auto data = result->view();
-    std::string i = data["id"].get_utf8().value.to_string();
+    rs->id = data["id"].get_utf8().value.to_string();
     int64_t ms = (data["start_time"].get_date().value).count();
     rs->start_time =  ms / 1000;
     ms = (data["end_time"].get_date().value).count();
@@ -152,6 +152,46 @@ bool MongoDB::exists(std::string colname, std::string id) {
   }
   else {
       return false;
+  }
+}
+
+void MongoDB::list_sessions(time_t from, time_t to) {
+  bsoncxx::document::value query = document{} 
+    << "start_time"   << open_document 
+      << "$gte" << time_t_to_b_date(from)
+      << "$lte" << time_t_to_b_date(to)
+      << close_document
+    << bsoncxx::builder::stream::finalize;
+    
+  std::cout << bsoncxx::to_json(query.view()) << "\n";
+
+  auto coll = collection("sessions");
+  mongocxx::cursor cursor = coll.find(query.view());
+
+  std::vector<Models::Session> sessions;
+  
+  for(auto doc : cursor) {
+    std::cout << bsoncxx::to_json(doc) << "\n";
+    
+    auto data = doc;
+    Models::Session rs;
+    rs.id = data["id"].get_utf8().value.to_string();
+    int64_t ms = (data["start_time"].get_date().value).count();
+    rs.start_time =  ms / 1000;
+    ms = (data["end_time"].get_date().value).count();
+    rs.end_time =  ms / 1000;
+    rs.distance = data["distance"].get_int32().value;
+    rs.duration = data["duration"].get_int32().value;
+    if(data["notes"]) {
+      rs.notes    = data["notes"].get_utf8().value.to_string();
+    }
+    rs.sport_type_id = data["sport_type_id"].get_int32().value;
+
+    sessions.push_back(rs);
+  }
+
+  for(auto session = sessions.begin(); session != sessions.end(); ++session) {
+    session->print();
   }
 }
 

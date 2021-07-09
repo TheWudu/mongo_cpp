@@ -32,7 +32,7 @@ TARGET = run
 all: json_o models_o use_case_o $(TARGET)
 
 $(TARGET): $(SRC) models_o json_o use_case_o
-	$(CC) $(SRC) $(CFLAGS) $(MONGOFLAGS) *.o -o $(TARGET) 
+	$(CC) $(SRC) $(CFLAGS) $(MONGOFLAGS) -lboost_date_time *.o -o $(TARGET) 
 
 clean:
 	$(RM) $(TARGET) *.o 

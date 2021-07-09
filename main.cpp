@@ -1,10 +1,12 @@
 #include <iostream>
 #include <vector>
 #include <string>
+
 #include "ext/json.hpp"
 #include "file_list.hpp"
 #include "json_parser.hpp"
 #include "mongo_db.hpp"
+#include "helper/time_converter.hpp"
 #include "use_case/weight_import.hpp"
 #include "use_case/session_import.hpp"
 #include "use_case/session_show.hpp"
@@ -13,6 +15,8 @@
 int main_menu() {
   std::string option;
 
+  std::cout << std::endl << std::endl;
+  std::cout << std::endl << std::endl;
   std::cout << "Menu" << std::endl << std::endl;
   std::cout << "  1) Import Weights" << std::endl;
   std::cout << "  2) Import Sessions" << std::endl;
@@ -39,6 +43,19 @@ void import_sessions() {
 }
 
 void list_sessions() {
+  MongoDB* mc = MongoDB::connection();
+  std::string from_str;
+  std::string to_str;
+
+  std::cout << "  From (YYYY-MM-DD): ";
+  std::cin  >> from_str;
+  std::cout << "  To   (YYYY-MM-DD): ";
+  std::cin  >> to_str; 
+  
+  time_t from = Helper::TimeConverter::string_to_time_t(from_str);
+  time_t to =   Helper::TimeConverter::string_to_time_t(to_str);
+
+  mc->list_sessions(from, to);
 }
 
 void show_session() {

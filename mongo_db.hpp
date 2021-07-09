@@ -40,6 +40,8 @@ public:
   void insert(Models::Weight weight);
   void insert(Models::Session session);
 
+  void list_sessions(time_t from, time_t to);
+
   bool find(std::string id, Models::Weight* weight);
   bool find(std::string id, Models::Session* session);
 
