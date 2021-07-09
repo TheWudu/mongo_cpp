@@ -43,6 +43,14 @@ void list_sessions() {
 
 void show_session() {
   UseCase::SessionShow session_show;
+  std::string id;
+
+  std::cout << "ID: ";
+  std::cin >> id;
+
+  std::cout << "Finding id " << id << " ..." << std::endl;
+  
+  session_show.find(id);
 }
 
 void show_statistics() {

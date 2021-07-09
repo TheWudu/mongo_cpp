@@ -120,6 +120,8 @@ bool MongoDB::find(std::string id, Models::Session* rs) {
     return false;
   }
   else {
+    // std::cout << bsoncxx::to_json(result->view()) << "\n";
+
     auto data = result->view();
     std::string i = data["id"].get_utf8().value.to_string();
     int64_t ms = (data["start_time"].get_date().value).count();
@@ -128,7 +130,9 @@ bool MongoDB::find(std::string id, Models::Session* rs) {
     rs->end_time =  ms / 1000;
     rs->distance = data["distance"].get_int32().value;
     rs->duration = data["duration"].get_int32().value;
-    rs->notes    = data["notes"].get_utf8().value.to_string();
+    if(data["notes"]) {
+      rs->notes    = data["notes"].get_utf8().value.to_string();
+    }
     rs->sport_type_id = data["sport_type_id"].get_int32().value;
   
     return true;
