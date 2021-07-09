@@ -1,11 +1,11 @@
 #include <iostream>
 
 #include "../helper/time_converter.hpp"
-#include "run_session.hpp"
+#include "session.hpp"
 
 namespace Models {
 
-  void RunSession::print() {
+  void Session::print() {
     std::cout << "id: " << this->id 
       << " - " << this->sport_type_id
       << " - " << Helper::TimeConverter::time_to_string(this->start_time) 

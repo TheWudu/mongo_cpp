@@ -63,7 +63,7 @@ bsoncxx::types::b_date time_t_to_b_date(time_t time) {
   return timedate;
 }
 
-void MongoDB::insert(Models::RunSession rs) {
+void MongoDB::insert(Models::Session rs) {
   auto builder = bsoncxx::builder::stream::document{};
 
   auto doc_value = builder
@@ -80,7 +80,7 @@ void MongoDB::insert(Models::RunSession rs) {
   }
   auto doc = doc_value << bsoncxx::builder::stream::finalize;
 
-  auto coll = collection("run_sessions");
+  auto coll = collection("sessions");
   bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc.view());
 }
 
@@ -108,12 +108,12 @@ bool MongoDB::find(std::string id, Models::Weight* weight) {
   }
 }
 
-bool MongoDB::find(std::string id, Models::RunSession* rs) {
+bool MongoDB::find(std::string id, Models::Session* rs) {
   bsoncxx::document::value query = document{} 
     << "id"   << id
     << bsoncxx::builder::stream::finalize;
 
-  auto coll = collection("run_sessions");
+  auto coll = collection("sessions");
   bsoncxx::stdx::optional<bsoncxx::document::value> result = coll.find_one(query.view());
  
   if(!result) { 
@@ -157,7 +157,7 @@ void MongoDB::aggregate_stats() {
   mongocxx::pipeline p{};
 
 /* 
-  db.run_sessions.aggregate([ 
+  db.sessions.aggregate([ 
     { $match: { "sport_type_id": { $in: [1,3,4,19] }, "start_time": { $gt: ISODate("2021-04-01"), $lt: ISODate("2022-01-01") } } }, 
     { $group: { _id: "$sport_type_id", overall_distance: { $sum: "$distance" }, overall_duration: { $sum: "$duration" }, overall_count: { $sum: 1 } } }, 
     { $project: { overall_distance: "$overall_distance", overall_duration: "$overall_duration", overall_count: "$overall_count", avg_distance: { $divide: [ "$overall_distance", "$overall_count" ] }, average_pace: { $divide: [ "$overall_duration", "$overall_distance"] } } } 
@@ -194,7 +194,7 @@ void MongoDB::aggregate_stats() {
                           kvp("average_pace", make_document(kvp("$divide", make_array("$overall_duration","$overall_distance"))))
   ));
 
-  auto cursor = collection("run_sessions").aggregate(p, mongocxx::options::aggregate{});
+  auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
   for(auto doc : cursor) {
     std::cout << bsoncxx::to_json(doc) << "\n";
   }

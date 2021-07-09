@@ -10,7 +10,7 @@ MONGOFLAGS=$(shell pkg-config --cflags --libs libmongocxx)
 
 SRC = mongo_db.cpp helper/time_converter.cpp main.cpp
 
-MODEL_SRC = models/weight.cpp models/run_session.cpp
+MODEL_SRC = models/weight.cpp models/session.cpp
 
 models_o: $(MODEL_SRC)
 	$(CC) $(CFLAGS) -c $(MODEL_SRC) 
@@ -21,7 +21,7 @@ JSON_SRC = file_list.cpp json_parser.cpp
 json_o: $(JSON_SRC)
 	$(CC) $(CFLAGS) -c $(JSON_SRC) 
 
-USE_CASE_SRC = use_case/run_session_import.cpp use_case/run_session_show.cpp use_case/weight_import.cpp
+USE_CASE_SRC = use_case/session_import.cpp use_case/session_show.cpp use_case/weight_import.cpp
 
 use_case_o: $(USE_CASE_SRC)
 	$(CC) $(CFLAGS) $(MONGOFLAGS) -c $(USE_CASE_SRC)

@@ -1,24 +1,24 @@
-#include "run_session_import.hpp"
+#include "session_import.hpp"
 
 #include "../ext/json.hpp"
 #include "../mongo_db.hpp"
 #include "../file_list.hpp"
 #include "../json_parser.hpp"
 
-#include "../models/run_session.hpp"
+#include "../models/session.hpp"
 
 using json = nlohmann::json;
 
-bool run_session_sort (Models::RunSession a, Models::RunSession b) { 
+bool session_sort (Models::Session a, Models::Session b) { 
   return (a.start_time < b.start_time); 
 }
 
-void UseCase::RunSessionImport::import() {
+void UseCase::SessionImport::import() {
     read_files();
     store_to_mongo();
 }
 
-void UseCase::RunSessionImport::read_files() {
+void UseCase::SessionImport::read_files() {
   FileList file_list = FileList("data/Sport-sessions");
 
   std::vector<std::string> files = file_list.files();
@@ -30,7 +30,7 @@ void UseCase::RunSessionImport::read_files() {
   
     json json_data = json_parser.get_data();
 
-    Models::RunSession rs;
+    Models::Session rs;
     rs.id          = json_data["id"];
     rs.distance    = json_data["distance"];
     rs.duration    = json_data["duration"];
@@ -49,12 +49,12 @@ void UseCase::RunSessionImport::read_files() {
     this->data.push_back(rs);
   }
 
-  sort(this->data.begin(), this->data.end(), run_session_sort);
+  sort(this->data.begin(), this->data.end(), session_sort);
 }
 
-void UseCase::RunSessionImport::store_to_mongo() {
+void UseCase::SessionImport::store_to_mongo() {
   MongoDB* mc = MongoDB::connection();
-  std::string collection("run_sessions");
+  std::string collection("sessions");
   int icnt = 0;
   int fcnt = 0;
 

@@ -3,7 +3,7 @@
 #include <string>
 
 namespace Models {
-  class RunSession {
+  class Session {
 
   public:
 
@@ -16,7 +16,7 @@ namespace Models {
     int32_t     sport_type_id;
     std::string notes;
 
-    RunSession() {};
+    Session() {};
 
     void print();
   };

@@ -1,10 +1,10 @@
 #pragma once
 
 #include <vector>
-#include "../models/run_session.hpp"
+#include "../models/session.hpp"
 
 namespace UseCase {
-  class RunSessionImport {
+  class SessionImport {
   public:
     void import();
 
@@ -13,6 +13,6 @@ namespace UseCase {
     void read_files();
     void store_to_mongo();
 
-    std::vector<Models::RunSession> data;
+    std::vector<Models::Session> data;
   };
 }

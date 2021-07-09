@@ -4,7 +4,7 @@
 
 namespace UseCase {
 
-  class RunSessionShow {
+  class SessionShow {
 
   public:
     void find(std::string id);

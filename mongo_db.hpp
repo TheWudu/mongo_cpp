@@ -4,7 +4,7 @@
 #include <mongocxx/instance.hpp>
 
 #include "models/weight.hpp"    
-#include "models/run_session.hpp"
+#include "models/session.hpp"
 
 class MongoDB {
 
@@ -38,10 +38,10 @@ public:
   mongocxx::collection collection(std::string name);
 
   void insert(Models::Weight weight);
-  void insert(Models::RunSession rs);
+  void insert(Models::Session session);
 
   bool find(std::string id, Models::Weight* weight);
-  bool find(std::string id, Models::RunSession* run_session);
+  bool find(std::string id, Models::Session* session);
 
   bool exists(std::string colname, std::string id);
 
