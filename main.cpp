@@ -47,6 +47,8 @@ void list_sessions() {
   MongoDB* mc = MongoDB::connection();
   std::string from_str;
   std::string to_str;
+  time_t from; 
+  time_t to;
 
   std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
 
@@ -56,14 +58,21 @@ void list_sessions() {
   std::getline(std::cin, to_str);
 
   if(from_str.empty()) {
-    from_str = "2021-01-01";
+    time_t SECONDS_IN_DAY = 60 * 60 * 24;
+    from = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    from -= (30 * SECONDS_IN_DAY);
+  }
+  else {
+    from = Helper::TimeConverter::string_to_time_t(from_str);
   }
   if(to_str.empty()) {
-    to_str = "2030-01-01";
+    to = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   }
-  
-  time_t from = Helper::TimeConverter::string_to_time_t(from_str);
-  time_t to =   Helper::TimeConverter::string_to_time_t(to_str);
+  else {
+    to = Helper::TimeConverter::string_to_time_t(to_str);
+  }
+
+  std::cout << "Fetching from: " << ctime(&from) << " to: " << ctime(&to) << std::endl;
 
   mc->list_sessions(from, to);
 }
