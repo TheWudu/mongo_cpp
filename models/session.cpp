@@ -1,18 +1,19 @@
 #include <iostream>
 
 #include "../helper/time_converter.hpp"
+#include "../helper/sport_types.hpp"
 #include "session.hpp"
 
 namespace Models {
 
   void Session::print() {
-    std::cout << "id: " << this->id 
-      << " - " << this->sport_type_id
-      << " - " << Helper::TimeConverter::time_to_string(this->start_time) 
-      << " - " << Helper::TimeConverter::time_to_string(this->end_time) 
-      << " - " << this->duration 
-      << " - " << this->distance
-      << " - " << this->notes
+    std::cout << "Session (id: " << this->id << ")" << std::endl
+      << "  sport type: " << Helper::SportType::name(this->sport_type_id) << std::endl
+      << "  start time: " << Helper::TimeConverter::time_to_string(this->start_time) << std::endl
+      << "  end time:   " << Helper::TimeConverter::time_to_string(this->end_time) << std::endl
+      << "  duration:   " << this->duration << std::endl
+      << "  distance:   " << this->distance << std::endl
+      << "  notes:      " << this->notes << std::endl
       << std::endl;
   }
 }

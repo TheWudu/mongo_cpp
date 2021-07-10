@@ -24,10 +24,11 @@ int main_menu() {
   std::cout << "  4) Show Session" << std::endl;
   std::cout << "  5) Show Statistics" << std::endl;
   std::cout << std::endl;
-  std::cout << "  0) EXIT" << std::endl;
+  std::cout << "  0) EXIT" << std::endl << std::endl;
   std::cout << " > ";
 
   std::cin >> option;
+  std::cout << std::endl;
 
   return std::stoi(option);
 }
@@ -47,10 +48,19 @@ void list_sessions() {
   std::string from_str;
   std::string to_str;
 
+  std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+
   std::cout << "  From (YYYY-MM-DD): ";
-  std::cin  >> from_str;
+  std::getline(std::cin, from_str);
   std::cout << "  To   (YYYY-MM-DD): ";
-  std::cin  >> to_str; 
+  std::getline(std::cin, to_str);
+
+  if(from_str.empty()) {
+    from_str = "2021-01-01";
+  }
+  if(to_str.empty()) {
+    to_str = "2030-01-01";
+  }
   
   time_t from = Helper::TimeConverter::string_to_time_t(from_str);
   time_t to =   Helper::TimeConverter::string_to_time_t(to_str);

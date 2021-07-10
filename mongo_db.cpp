@@ -208,23 +208,6 @@ void MongoDB::aggregate_stats() {
   ]
 */
 
-  /*
-    sport_types: 
-      1 .. running,
-      3 .. cycling,
-      7 .. hiking,
-      9 .. skiing,
-     19 .. walking
-     26 .. yoga,
-     31 .. pilates,
-     32 .. climbing,
-     54 .. ice-skating,
-     55 .. sledding,
-     69 .. crossfit,
-     70 .. dancing,
-     71 .. ice-hokey,
-     74 .. gymnastics
-  */
   p.match(make_document(kvp("sport_type_id", make_document(kvp("$in", make_array(1,19,7))))));
   p.group(make_document(kvp("_id", "$sport_type_id"), 
                         kvp("overall_distance", make_document(kvp("$sum", "$distance"))),
