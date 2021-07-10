@@ -14,10 +14,11 @@ exported recently and had that data in my hands when starting this.
 * Find/Read those documents and convert to models
 * Check for existance of those documents
 * Simple aggregation to calculate some statistics
+* Simple menu for selecting some actions
+* List sessions, filter by from and to date, default to 30 days ago and now.
 
 Some more things I will provide most likely:
 
-* simple menu for selecting some actions
 * some more aggregations and filtering on them
 
 ## Setup
