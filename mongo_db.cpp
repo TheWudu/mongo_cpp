@@ -120,20 +120,7 @@ bool MongoDB::find(std::string id, Models::Session* rs) {
     return false;
   }
   else {
-    // std::cout << bsoncxx::to_json(result->view()) << "\n";
-
-    auto data = result->view();
-    rs->id = data["id"].get_utf8().value.to_string();
-    int64_t ms = (data["start_time"].get_date().value).count();
-    rs->start_time =  ms / 1000;
-    ms = (data["end_time"].get_date().value).count();
-    rs->end_time =  ms / 1000;
-    rs->distance = data["distance"].get_int32().value;
-    rs->duration = data["duration"].get_int32().value;
-    if(data["notes"]) {
-      rs->notes    = data["notes"].get_utf8().value.to_string();
-    }
-    rs->sport_type_id = data["sport_type_id"].get_int32().value;
+    build_session(result->view(), rs);
   
     return true;
   }
@@ -155,6 +142,20 @@ bool MongoDB::exists(std::string colname, std::string id) {
   }
 }
 
+void MongoDB::build_session(bsoncxx::v_noabi::document::view data, Models::Session* session) {
+  session->id = data["id"].get_utf8().value.to_string();
+  int64_t ms = (data["start_time"].get_date().value).count();
+  session->start_time =  ms / 1000;
+  ms = (data["end_time"].get_date().value).count();
+  session->end_time =  ms / 1000;
+  session->distance = data["distance"].get_int32().value;
+  session->duration = data["duration"].get_int32().value;
+  if(data["notes"]) {
+    session->notes    = data["notes"].get_utf8().value.to_string();
+  }
+  session->sport_type_id = data["sport_type_id"].get_int32().value;
+}
+
 void MongoDB::list_sessions(time_t from, time_t to) {
   bsoncxx::document::value query = document{} 
     << "start_time"   << open_document 
@@ -173,25 +174,13 @@ void MongoDB::list_sessions(time_t from, time_t to) {
   for(auto doc : cursor) {
     std::cout << bsoncxx::to_json(doc) << "\n";
     
-    auto data = doc;
     Models::Session rs;
-    rs.id = data["id"].get_utf8().value.to_string();
-    int64_t ms = (data["start_time"].get_date().value).count();
-    rs.start_time =  ms / 1000;
-    ms = (data["end_time"].get_date().value).count();
-    rs.end_time =  ms / 1000;
-    rs.distance = data["distance"].get_int32().value;
-    rs.duration = data["duration"].get_int32().value;
-    if(data["notes"]) {
-      rs.notes    = data["notes"].get_utf8().value.to_string();
-    }
-    rs.sport_type_id = data["sport_type_id"].get_int32().value;
-
+    build_session(doc, &rs);
     sessions.push_back(rs);
   }
 
-  for(auto session = sessions.begin(); session != sessions.end(); ++session) {
-    session->print();
+  for(auto session: sessions) {
+    session.print();
   }
 }
 

@@ -42,6 +42,8 @@ public:
 
   void list_sessions(time_t from, time_t to);
 
+  void build_session(bsoncxx::v_noabi::document::view data, Models::Session* session);
+
   bool find(std::string id, Models::Weight* weight);
   bool find(std::string id, Models::Session* session);
 
