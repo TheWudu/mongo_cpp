@@ -16,10 +16,17 @@ exported recently and had that data in my hands when starting this.
 * Simple aggregation to calculate some statistics
 * Simple menu for selecting some actions
 * List sessions, filter by from and to date, default to 30 days ago and now.
+* Allow command line usage (ls, show, stats..)
 
 Some more things I will provide most likely:
 
 * some more aggregations and filtering on them
+
+## TODO
+
+* add more aggregations and filtering
+* format aggregation output properly
+* add usage message for command line args
 
 ## Setup
 
