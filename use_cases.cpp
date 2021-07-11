@@ -18,34 +18,27 @@ void import_sessions() {
   rs_import.import();
 }
 
-void list_sessions() {
+void list_sessions(std::map<std::string, std::string> const args) {
   MongoDB* mc = MongoDB::connection();
-  std::string from_str;
-  std::string to_str;
   time_t from; 
   time_t to;
 
-
-  std::cout << "  From (YYYY-MM-DD): ";
-  std::getline(std::cin, from_str);
-  std::cout << "  To   (YYYY-MM-DD): ";
-  std::getline(std::cin, to_str);
-
-  if(from_str.empty()) {
+  try { 
+    from = Helper::TimeConverter::string_to_time_t(args.at("-from"));
+  }
+  catch (std::out_of_range&) {
     time_t SECONDS_IN_DAY = 60 * 60 * 24;
     from = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     from -= (30 * SECONDS_IN_DAY);
   }
-  else {
-    from = Helper::TimeConverter::string_to_time_t(from_str);
+
+  try { 
+    to = Helper::TimeConverter::string_to_time_t(args.at("-to"));
   }
-  if(to_str.empty()) {
+  catch (std::out_of_range&) {
     to = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   }
-  else {
-    to = Helper::TimeConverter::string_to_time_t(to_str);
-  }
-
+  
   std::cout << "Fetching from: " << ctime(&from) << " to: " << ctime(&to) << std::endl;
 
   mc->list_sessions(from, to);

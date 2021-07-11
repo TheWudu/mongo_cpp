@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <map>
 
 #include "menu.hpp"
 #include "../use_cases.hpp"
@@ -31,6 +32,10 @@ void menu_mode() {
 
   do {
     option = show_main_menu();
+
+    std::map<std::string, std::string> args;
+    std::string from_str;
+    std::string to_str;
     
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
 
@@ -42,7 +47,20 @@ void menu_mode() {
         import_sessions();
         break;
       case 3: 
-        list_sessions();
+
+        std::cout << "  From (YYYY-MM-DD): ";
+        std::getline(std::cin, from_str);
+        std::cout << "  To   (YYYY-MM-DD): ";
+        std::getline(std::cin, to_str);
+
+        if(!from_str.empty()) {
+          args.insert({"-from", from_str});
+        }
+        if(!to_str.empty()) {
+          args.insert({"-to", to_str});
+        }
+
+        list_sessions(args);
         break;
       case 4: 
         show_session(); 
