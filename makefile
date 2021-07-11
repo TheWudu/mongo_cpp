@@ -8,15 +8,16 @@ CC = g++
 CFLAGS= -g -Wall --std=c++17
 MONGOFLAGS=$(shell pkg-config --cflags --libs libmongocxx)
 
-SRC = mongo_db.cpp helper/time_converter.cpp main.cpp
-
+SRC = mongo_db.cpp use_cases.cpp main.cpp
 MODEL_SRC = models/weight.cpp models/session.cpp
+JSON_SRC = file_list.cpp json_parser.cpp
+HELPER_SRC = helper/time_converter.cpp helper/menu.cpp
+
+helpers_o: $(HELPER_SRC)
+	$(CC) $(CFLAGS) -c $(HELPER_SRC) 
 
 models_o: $(MODEL_SRC)
 	$(CC) $(CFLAGS) -c $(MODEL_SRC) 
-
-
-JSON_SRC = file_list.cpp json_parser.cpp
 
 json_o: $(JSON_SRC)
 	$(CC) $(CFLAGS) -c $(JSON_SRC) 
@@ -29,9 +30,9 @@ use_case_o: $(USE_CASE_SRC)
 # The build target 
 TARGET = run
 
-all: json_o models_o use_case_o $(TARGET)
+all: json_o models_o helpers_o use_case_o $(TARGET)
 
-$(TARGET): $(SRC) models_o json_o use_case_o
+$(TARGET): $(SRC) models_o json_o use_case_o helpers_o
 	$(CC) $(SRC) $(CFLAGS) $(MONGOFLAGS) -lboost_date_time *.o -o $(TARGET) 
 
 clean:
