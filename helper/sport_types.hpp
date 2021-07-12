@@ -17,6 +17,21 @@ namespace Helper {
       }
     }
 
+    static int id(std::string name) {
+      try {
+        for(auto const& [k,v] : sport_types()) {
+          if(v == name) {
+            return k;
+          }
+        }
+        throw std::out_of_range("Not found");
+      } 
+      catch(std::out_of_range const&) {
+        std::cout << "Don't know id for " + name << std::endl;
+        return 0;
+      }
+    }
+
   private:
 
     static std::map<int, std::string> sport_types() {

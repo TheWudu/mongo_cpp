@@ -40,7 +40,7 @@ public:
   void insert(Models::Weight weight);
   void insert(Models::Session session);
 
-  void list_sessions(time_t from, time_t to);
+  void list_sessions(time_t from, time_t to, int sport_type_id);
 
   void build_session(bsoncxx::v_noabi::document::view data, Models::Session* session);
 

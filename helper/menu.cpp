@@ -36,6 +36,7 @@ void menu_mode() {
     std::map<std::string, std::string> args;
     std::string from_str;
     std::string to_str;
+    std::string sport_type_str;
     
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
 
@@ -52,12 +53,17 @@ void menu_mode() {
         std::getline(std::cin, from_str);
         std::cout << "  To   (YYYY-MM-DD): ";
         std::getline(std::cin, to_str);
+        std::cout << "  SportType:         ";
+        std::getline(std::cin, sport_type_str);
 
         if(!from_str.empty()) {
           args.insert({"-from", from_str});
         }
         if(!to_str.empty()) {
           args.insert({"-to", to_str});
+        }
+        if(!sport_type_str.empty()) {
+          args.insert({"-sport_type", sport_type_str});
         }
 
         list_sessions(args);

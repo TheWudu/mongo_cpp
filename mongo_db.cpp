@@ -68,6 +68,8 @@ void MongoDB::insert(Models::Session rs) {
 
   auto doc_value = builder
     << "id"   << rs.id
+    << "year" << gmtime(&rs.start_time)->tm_year + 1900
+    << "month" << gmtime(&rs.start_time)->tm_mon + 1
     << "start_time" << time_t_to_b_date(rs.start_time)
     << "end_time" << time_t_to_b_date(rs.end_time)
     << "start_time_timezone_offset" << rs.start_time_timezone_offset
@@ -156,14 +158,17 @@ void MongoDB::build_session(bsoncxx::v_noabi::document::view data, Models::Sessi
   session->sport_type_id = data["sport_type_id"].get_int32().value;
 }
 
-void MongoDB::list_sessions(time_t from, time_t to) {
-  bsoncxx::document::value query = document{} 
-    << "start_time"   << open_document 
+void MongoDB::list_sessions(time_t from, time_t to, int sport_type_id) {
+   auto builder = bsoncxx::builder::stream::document{};
+   auto doc = builder << "start_time"   << open_document 
       << "$gte" << time_t_to_b_date(from)
       << "$lte" << time_t_to_b_date(to)
-      << close_document
-    << bsoncxx::builder::stream::finalize;
-    
+      << close_document;
+  if(sport_type_id != 0) {
+    doc << "sport_type_id" << sport_type_id;
+  }
+  auto query = doc << bsoncxx::builder::stream::finalize;
+
   std::cout << bsoncxx::to_json(query.view()) << "\n";
 
   auto coll = collection("sessions");

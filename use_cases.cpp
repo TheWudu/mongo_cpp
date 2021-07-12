@@ -2,6 +2,7 @@
 #include <string>
 #include "mongo_db.hpp"
 #include "helper/time_converter.hpp"
+#include "helper/sport_types.hpp"
 #include "use_case/weight_import.hpp"
 #include "use_case/session_import.hpp"
 #include "use_case/session_show.hpp"
@@ -22,6 +23,7 @@ void list_sessions(std::map<std::string, std::string> const args) {
   MongoDB* mc = MongoDB::connection();
   time_t from; 
   time_t to;
+  int    sport_type_id;
 
   try { 
     from = Helper::TimeConverter::string_to_time_t(args.at("-from"));
@@ -39,9 +41,16 @@ void list_sessions(std::map<std::string, std::string> const args) {
     to = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   }
   
+  try { 
+    sport_type_id = Helper::SportType::id(args.at("-sport_type"));
+  }
+  catch (std::out_of_range&) {
+    sport_type_id = 0;
+  }
+  
   std::cout << "Fetching from: " << ctime(&from) << " to: " << ctime(&to) << std::endl;
 
-  mc->list_sessions(from, to);
+  mc->list_sessions(from, to, sport_type_id);
 }
 
 void show_session() {
