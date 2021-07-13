@@ -1,5 +1,7 @@
 #include <cstdint>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 #include <vector>
 
 #include <bsoncxx/json.hpp>
@@ -15,6 +17,9 @@
 #include <bsoncxx/string/to_string.hpp>
 #include <mongocxx/exception/exception.hpp>
 #include <mongocxx/exception/logic_error.hpp>
+
+#include "helper/time_converter.hpp"
+#include "helper/sport_types.hpp"
 
 using namespace mongocxx;
 
@@ -169,7 +174,7 @@ void MongoDB::list_sessions(time_t from, time_t to, int sport_type_id) {
   }
   auto query = doc << bsoncxx::builder::stream::finalize;
 
-  std::cout << bsoncxx::to_json(query.view()) << "\n";
+  // std::cout << bsoncxx::to_json(query.view()) << "\n";
 
   auto coll = collection("sessions");
   mongocxx::cursor cursor = coll.find(query.view());
@@ -177,7 +182,7 @@ void MongoDB::list_sessions(time_t from, time_t to, int sport_type_id) {
   std::vector<Models::Session> sessions;
   
   for(auto doc : cursor) {
-    std::cout << bsoncxx::to_json(doc) << "\n";
+    // std::cout << bsoncxx::to_json(doc) << "\n";
     
     Models::Session rs;
     build_session(doc, &rs);
@@ -202,8 +207,8 @@ void MongoDB::aggregate_stats() {
   ]
 */
 
-  p.match(make_document(kvp("sport_type_id", make_document(kvp("$in", make_array(1,19,7))))));
-  p.group(make_document(kvp("_id", "$sport_type_id"), 
+  p.match(make_document(kvp("sport_type_id", make_document(kvp("$in", make_array(1,19,7)))), kvp("year",make_document(kvp("$in", make_array(2020,2021))))));
+  p.group(make_document(kvp("_id", make_document(kvp("sport_type_id", "$sport_type_id"), kvp("year", "$year"))), 
                         kvp("overall_distance", make_document(kvp("$sum", "$distance"))),
                         kvp("overall_duration", make_document(kvp("$sum", "$duration"))),
                         kvp("overall_count", make_document(kvp("$sum", 1)))
@@ -214,9 +219,23 @@ void MongoDB::aggregate_stats() {
                           kvp("average_distance", make_document(kvp("$divide", make_array("$overall_distance","$overall_count")))),
                           kvp("average_pace", make_document(kvp("$divide", make_array("$overall_duration","$overall_distance"))))
   ));
+  p.sort(make_document(kvp("_id.year", 1)));
 
   auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
   for(auto doc : cursor) {
-    std::cout << bsoncxx::to_json(doc) << "\n";
+    // std::cout << bsoncxx::to_json(doc) << "\n";
+
+    std::stringstream ss;
+    ss <<  doc["_id"]["year"].get_int32().value << "/" << Helper::SportType::name(doc["_id"]["sport_type_id"].get_int32().value);
+    std::string id = ss.str();
+    int32_t overall_distance = doc["overall_distance"].get_int32().value;
+    int32_t overall_duration = doc["overall_duration"].get_int32().value;
+    int32_t overall_count    = doc["overall_count"].get_int32().value;
+    double average_distance  = doc["average_distance"].get_double().value;
+    double average_pace      = doc["average_pace"].get_double().value;
+
+    std::cout << "_id: " << id << " (#" << overall_count << ")" << std::endl
+      << "  overall_distance: " << std::setw(10) << overall_distance / 1000 << " [km], overall_duration: " << Helper::TimeConverter::ms_to_min_str(overall_duration) << std::endl
+      << "  average_distance: " << std::setw(10) << average_distance / 1000 << " [km], average_pace:     " << Helper::TimeConverter::secs_to_min_str(average_pace) << std::endl;
   }
 }

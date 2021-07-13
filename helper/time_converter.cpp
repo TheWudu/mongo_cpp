@@ -1,9 +1,10 @@
 #include "time_converter.hpp"
 
+#include <sstream>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-std::string Helper::TimeConverter::time_to_string(time_t time) {
+std::string Helper::TimeConverter::time_to_string(const time_t time) {
   char buf[19];
   struct tm * timeinfo = localtime(&time);
   strftime(buf, sizeof(buf), "%Y-%m-%dT%H-%MZ", timeinfo);
@@ -19,4 +20,20 @@ time_t Helper::TimeConverter::string_to_time_t( const std::string time_str ) {
   time_t time = time_t(secs);
 
   return time;
+}
+
+std::string Helper::TimeConverter::ms_to_min_str( uint32_t ms ) {
+  return secs_to_min_str(ms / 1000);
+}
+
+std::string Helper::TimeConverter::secs_to_min_str( uint32_t secs ) {
+  std::stringstream ss;
+
+  if(secs > 3600) {
+    ss << secs / 3600 << ":";
+    secs %= 3600;
+  }
+  ss << secs / 60 << ":"
+     << secs % 60;
+  return ss.str();
 }

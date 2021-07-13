@@ -8,7 +8,9 @@ namespace Helper {
 
   public:
 
-    static std::string time_to_string(time_t time);
+    static std::string time_to_string(const time_t time);
     static time_t string_to_time_t(const std::string);
+    static std::string secs_to_min_str(uint32_t secs);
+    static std::string ms_to_min_str(uint32_t ms);
   };
 }
