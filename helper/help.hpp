@@ -49,9 +49,15 @@ void show_help_ls() {
 }
 
 void show_help_show() {
+  std::cout << "Show session, shows a single session by id. \n"
+            << "No additional parameters available"
+            << std::endl;
 }
 
 void show_help_stats() {
+  std::cout << "Show some statistics. Currently for 2020/2021 \n"
+            << "No additional parameters available"
+            << std::endl;
 }
 
 void show_help(std::string const command) {
