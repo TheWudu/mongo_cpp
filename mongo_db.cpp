@@ -234,8 +234,9 @@ void MongoDB::aggregate_stats() {
     double average_distance  = doc["average_distance"].get_double().value;
     double average_pace      = doc["average_pace"].get_double().value;
 
-    std::cout << "_id: " << id << " (#" << overall_count << ")" << std::endl
+    std::cout << id << " (#" << overall_count << ")" << std::endl
       << "  overall_distance: " << std::setw(10) << overall_distance / 1000 << " [km], overall_duration: " << Helper::TimeConverter::ms_to_min_str(overall_duration) << std::endl
-      << "  average_distance: " << std::setw(10) << average_distance / 1000 << " [km], average_pace:     " << Helper::TimeConverter::secs_to_min_str(average_pace) << std::endl;
+      << "  average_distance: " << std::setw(10) << average_distance / 1000 << " [km], average_pace:     " << Helper::TimeConverter::secs_to_min_str(average_pace) << std::endl
+      << std::endl;
   }
 }

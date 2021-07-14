@@ -4,52 +4,38 @@
 #include <string>
 #include <boost/algorithm/string.hpp>
 
+#include "helper/args.hpp"
 #include "helper/menu.hpp"
+#include "helper/help.hpp"
 #include "use_cases.hpp"
 
 
-enum Arguments {
-  menu,
-  ls,
-  session_import,
-  stats,
-  show,
-  weight_import,
-  // unknown input
-  unknown
-};
+void parse_args(int argc, char* argv[], std::map<std::string, std::string>& args) {
+  std::vector<std::string> strs;
 
-Arguments argv_to_arg(std::string const arg) {
-  if (arg == "menu")           { return menu; }
-  if (arg == "ls")             { return ls; }
-  if (arg == "session_import") { return session_import; }
-  if (arg == "weight_import")  { return weight_import;  }
-  if (arg == "show")           { return show; }
-  if (arg == "stats")          { return stats; }
-  return unknown;
+  for(int i = 2; i < argc; i++) {
+    boost::split(strs, argv[i], boost::is_any_of("="));
+
+    args.insert({strs[0], strs[1]});
+  }
+
+  for(const auto& [name, value] : args) {
+    std::cout << "arg: " << name << " - " << value << std::endl;
+  }
 }
 
 int main(int argc, char* argv[])
 {
   if(argc > 1) {
 
-    std::vector<std::string> strs;
+    Arguments command = argv_to_arg(argv[1]);
     std::map<std::string, std::string> args;
 
-    for(int i = 2; i < argc; i++) {
-      boost::split(strs, argv[i], boost::is_any_of("="));
-
-      args.insert({strs[0], strs[1]});
-    }
-
-    for(const auto& [name, value] : args) {
-      std::cout << "arg: " << name << " - " << value << std::endl;
-    }
-
-    switch(argv_to_arg(argv[1])) {
+    switch(command) {
       case menu: 
         menu_mode(); break;
       case ls: 
+        parse_args(argc, argv, args);
         list_sessions(args); break;
       case show: 
         show_session(); break;
@@ -59,10 +45,21 @@ int main(int argc, char* argv[])
         import_weights(); break;
       case session_import:
         import_sessions(); break;
+      case help:
+        if(argc == 3) {
+          show_help(argv[2]);
+        }
+        else {
+          show_help(); 
+        }
+        break;
       case unknown:
       default:
         std::cout << "Unknown arg: '" << argv[1] << "'" << std::endl;
     }
+  }
+  else {
+    show_help();
   }
 
   return 0;
