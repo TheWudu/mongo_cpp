@@ -55,20 +55,24 @@ void list_sessions(std::map<std::string, std::string> const args) {
   mc->list_sessions(from, to, sport_type_id);
 }
 
-void show_session() {
+void show_session(std::map<std::string, std::string> const args) {
   UseCase::SessionShow session_show;
   std::string id;
 
-  std::cout << "ID: ";
-  std::cin >> id;
+  try {
+    id = args.at("-id");
+  }
+  catch (std::out_of_range&) {
+    std::cout << "ID: ";
+    std::cin >> id;
+  }
 
   std::cout << "Finding id " << id << " ..." << std::endl;
   
   session_show.find(id);
 }
 
-std::vector<int> arg_to_int_vec(std::map<std::string, std::string> const args, 
-  std::string param) {
+std::vector<int> arg_to_int_vec(std::map<std::string, std::string> const args, std::string param) {
 
   std::vector<int> vec;
   std::vector<std::string> strs;

@@ -38,7 +38,8 @@ int main(int argc, char* argv[])
         parse_args(argc, argv, args);
         list_sessions(args); break;
       case show: 
-        show_session(); break;
+        parse_args(argc, argv, args);
+        show_session(args); break;
       case stats:
         parse_args(argc, argv, args);
         show_statistics(args); break;

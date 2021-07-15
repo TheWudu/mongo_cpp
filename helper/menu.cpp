@@ -70,7 +70,7 @@ void menu_mode() {
         list_sessions(args);
         break;
       case 4: 
-        show_session(); 
+        show_session(args); 
         break;
       case 5: 
         std::cout << "  Year (YYYY):";

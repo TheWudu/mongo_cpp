@@ -50,7 +50,8 @@ void show_help_ls() {
 
 void show_help_show() {
   std::cout << "Show session, shows a single session by id. \n"
-            << "No additional parameters available"
+            << "Possible parameters are: \n"
+            << "  -id=UID       e.g. 123-127382-12ab-123    no default, shows a prompt to enter it if missing\n"
             << std::endl;
 }
 
