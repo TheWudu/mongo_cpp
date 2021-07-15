@@ -40,7 +40,8 @@ int main(int argc, char* argv[])
       case show: 
         show_session(); break;
       case stats:
-        show_statistics(); break;
+        parse_args(argc, argv, args);
+        show_statistics(args); break;
       case weight_import:
         import_weights(); break;
       case session_import:

@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <boost/algorithm/string.hpp>
+
 #include "mongo_db.hpp"
 #include "helper/time_converter.hpp"
 #include "helper/sport_types.hpp"
@@ -65,7 +67,48 @@ void show_session() {
   session_show.find(id);
 }
 
-void show_statistics() {
+std::vector<int> arg_to_int_vec(std::map<std::string, std::string> const args, 
+  std::string param) {
+
+  std::vector<int> vec;
+  std::vector<std::string> strs;
+
+  boost::split(strs, args.at(param), boost::is_any_of(","));
+  for(auto s : strs) {
+    vec.push_back(std::stoi(s));
+  }
+  return vec;
+}
+
+int current_year() {
+  time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  return gmtime(&now)->tm_year + 1900;
+}
+
+void show_statistics(std::map<std::string, std::string> const args) {
   MongoDB* mc = MongoDB::connection();
-  mc->aggregate_stats();
+  std::vector<int> years;
+  std::vector<int> sport_type_ids;
+  
+   
+  try { 
+    years = arg_to_int_vec(args,"-year");
+  }
+  catch (std::out_of_range&) {
+    years.push_back(current_year());
+  }
+  
+  try { 
+    std::vector<std::string> strs;
+
+    boost::split(strs, args.at("-sport_type"), boost::is_any_of(","));
+    for(auto s : strs) {
+      sport_type_ids.push_back(Helper::SportType::id(s));
+    }
+  }
+  catch (std::out_of_range&) {
+    sport_type_ids.push_back(1); // running
+  }
+
+  mc->aggregate_stats(years, sport_type_ids);
 }

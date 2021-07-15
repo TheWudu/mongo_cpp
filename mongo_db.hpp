@@ -21,6 +21,9 @@ private:
 
   static MongoDB* _inst;
 
+  template <class T>
+  bsoncxx::builder::basic::array vector_to_array(std::vector<T> vec);
+
 public:
 
   static MongoDB* connection() {
@@ -49,7 +52,7 @@ public:
 
   bool exists(std::string colname, std::string id);
 
-  void aggregate_stats();
+  void aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids);
   void print_collection(std::string name);
 };
 

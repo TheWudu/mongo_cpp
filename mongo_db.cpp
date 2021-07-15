@@ -194,7 +194,16 @@ void MongoDB::list_sessions(time_t from, time_t to, int sport_type_id) {
   }
 }
 
-void MongoDB::aggregate_stats() {
+template <class T>
+bsoncxx::builder::basic::array MongoDB::vector_to_array(std::vector<T> vec) {
+  bsoncxx::builder::basic::array a = bsoncxx::builder::basic::array();
+  for(auto v : vec) {
+    a.append(v);
+  }
+  return a;
+}
+
+void MongoDB::aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids) {
   using namespace bsoncxx::builder::basic;
 
   mongocxx::pipeline p{};
@@ -204,10 +213,10 @@ void MongoDB::aggregate_stats() {
     { $match: { "sport_type_id": { $in: [1,3,4,19] }, "start_time": { $gt: ISODate("2021-04-01"), $lt: ISODate("2022-01-01") } } }, 
     { $group: { _id: "$sport_type_id", overall_distance: { $sum: "$distance" }, overall_duration: { $sum: "$duration" }, overall_count: { $sum: 1 } } }, 
     { $project: { overall_distance: "$overall_distance", overall_duration: "$overall_duration", overall_count: "$overall_count", avg_distance: { $divide: [ "$overall_distance", "$overall_count" ] }, average_pace: { $divide: [ "$overall_duration", "$overall_distance"] } } } 
-  ]
+  ] years
 */
 
-  p.match(make_document(kvp("sport_type_id", make_document(kvp("$in", make_array(1,19,7)))), kvp("year",make_document(kvp("$in", make_array(2020,2021))))));
+  p.match(make_document(kvp("sport_type_id", make_document(kvp("$in", vector_to_array(sport_type_ids)))), kvp("year",make_document(kvp("$in", vector_to_array(years))))));
   p.group(make_document(kvp("_id", make_document(kvp("sport_type_id", "$sport_type_id"), kvp("year", "$year"))), 
                         kvp("overall_distance", make_document(kvp("$sum", "$distance"))),
                         kvp("overall_duration", make_document(kvp("$sum", "$duration"))),

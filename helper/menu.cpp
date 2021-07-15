@@ -34,6 +34,7 @@ void menu_mode() {
     option = show_main_menu();
 
     std::map<std::string, std::string> args;
+    std::string year_str;
     std::string from_str;
     std::string to_str;
     std::string sport_type_str;
@@ -72,7 +73,12 @@ void menu_mode() {
         show_session(); 
         break;
       case 5: 
-        show_statistics();
+        std::cout << "  Year (YYYY):";
+        std::getline(std::cin, year_str);
+        if(!year_str.empty()) {
+          args.insert({"-year", year_str});
+        }
+        show_statistics(args);
         break;
       case 0: 
         std::cout << "Exiting..." << std::endl;
