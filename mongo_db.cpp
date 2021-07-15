@@ -230,6 +230,8 @@ void MongoDB::aggregate_stats(std::vector<int> years, std::vector<int> sport_typ
   ));
   p.sort(make_document(kvp("_id.year", 1)));
 
+  std::cout << std::endl << "Track based statistics:" << std::endl << std::endl;
+
   auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
   for(auto doc : cursor) {
     // std::cout << bsoncxx::to_json(doc) << "\n";
@@ -248,4 +250,59 @@ void MongoDB::aggregate_stats(std::vector<int> years, std::vector<int> sport_typ
       << "  average_distance: " << std::setw(10) << average_distance / 1000 << " [km], average_pace:     " << Helper::TimeConverter::secs_to_min_str(average_pace) << std::endl
       << std::endl;
   }
+
+  aggregate_weekdays(years, sport_type_ids);
 }
+
+void MongoDB::aggregate_weekdays(std::vector<int> years, std::vector<int> sport_type_ids) {
+  using namespace bsoncxx::builder::basic;
+
+  mongocxx::pipeline p{};
+
+  /*
+    db.sessions.aggregate([ 
+      { $match: { year: 2021, month: 7, sport_type_id: 1 } }, 
+      { $addFields: { weekday: { $dayOfWeek: "$start_time" } } }, 
+      { $group: { _id: "$weekday", cnt: { $sum: 1 } } } 
+    ])
+  */
+
+  // p.match(make_document(kvp("sport_type_id", make_document(kvp("$in", vector_to_array(sport_type_ids)))), kvp("year",make_document(kvp("$in", vector_to_array(years))))));
+  p.match(make_document(kvp("sport_type_id", make_document(kvp("$in", vector_to_array(sport_type_ids)))), kvp("year",make_document(kvp("$in", vector_to_array(years))))));
+  p.add_fields(make_document(kvp("weekday", make_document(kvp("$dayOfWeek", "$start_time")))));
+  p.group(make_document(kvp("_id", "$weekday"), 
+                        kvp("count", make_document(kvp("$sum", 1)))
+          ));
+  p.sort(make_document(kvp("_id", 1)));
+
+  auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+  std::vector<int> daycount;
+  int min_val = 0;
+  int max_val = 0;
+    
+  for(auto doc : cursor) {
+    // std::cout << bsoncxx::to_json(doc) << "\n";
+    int val = doc["count"].get_int32().value;
+
+    if(val > max_val) { max_val = val; }
+    if(val < min_val || min_val == 0) { min_val = val; }
+
+    daycount.push_back(val);
+  }
+  
+  int sunday = daycount.at(0);
+  daycount.erase(daycount.begin());
+  daycount.push_back(sunday);
+
+  std::cout << "Sessions per weekday: " << std::endl << std::endl;
+  for(uint32_t i = 0; i < daycount.size(); i++) {
+    int val = daycount.at(i);
+
+    std::cout << std::setfill(' ') 
+      << std::setw(10) << Helper::TimeConverter::weekday_name(i) 
+      << std::setw(2) << "(" << std::setw(2) << val << ") |"
+      << std::setw(val - min_val + 5) << std::setfill('*') << "\n";
+  }
+  std::cout << std::endl;
+}
+   

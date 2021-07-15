@@ -12,5 +12,6 @@ namespace Helper {
     static time_t string_to_time_t(const std::string);
     static std::string secs_to_min_str(uint32_t secs);
     static std::string ms_to_min_str(uint32_t ms);
+    static std::string weekday_name(int i);
   };
 }

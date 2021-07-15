@@ -24,6 +24,8 @@ private:
   template <class T>
   bsoncxx::builder::basic::array vector_to_array(std::vector<T> vec);
 
+  void aggregate_weekdays(std::vector<int> years, std::vector<int> sport_type_ids);
+
 public:
 
   static MongoDB* connection() {

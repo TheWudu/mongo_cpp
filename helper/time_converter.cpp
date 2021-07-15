@@ -37,3 +37,18 @@ std::string Helper::TimeConverter::secs_to_min_str( uint32_t secs ) {
      << secs % 60;
   return ss.str();
 }
+
+
+std::string Helper::TimeConverter::weekday_name(int i) {
+  static std::vector<std::string> weekday_strings = {
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+  };
+  return weekday_strings.at(i);
+}
+
