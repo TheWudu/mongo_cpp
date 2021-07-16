@@ -33,8 +33,9 @@ std::string Helper::TimeConverter::secs_to_min_str( uint32_t secs ) {
     ss << secs / 3600 << ":";
     secs %= 3600;
   }
-  ss << secs / 60 << ":"
-     << secs % 60;
+  ss << std::setw(2) << std::setfill('0') << secs / 60 << ":"
+     << std::setw(2) << std::setfill('0') << secs % 60
+     << std::setfill(' ');
   return ss.str();
 }
 

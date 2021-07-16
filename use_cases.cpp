@@ -50,7 +50,9 @@ void list_sessions(std::map<std::string, std::string> const args) {
     sport_type_id = 0;
   }
   
-  std::cout << "Fetching from: " << ctime(&from) << " to: " << ctime(&to) << std::endl;
+  std::cout << "Fetching from: " << ctime(&from) 
+            << "         to:   " << ctime(&to) 
+            << std::endl;
 
   mc->list_sessions(from, to, sport_type_id);
 }
@@ -96,18 +98,22 @@ void show_statistics(std::map<std::string, std::string> const args) {
   
    
   try { 
-    years = arg_to_int_vec(args,"-year");
+    if(args.at("-year") != "all") {
+      years = arg_to_int_vec(args,"-year");
+    }
   }
   catch (std::out_of_range&) {
     years.push_back(current_year());
   }
   
   try { 
-    std::vector<std::string> strs;
+    if(args.at("-sport_type") != "all") {
+      std::vector<std::string> strs;
 
-    boost::split(strs, args.at("-sport_type"), boost::is_any_of(","));
-    for(auto s : strs) {
-      sport_type_ids.push_back(Helper::SportType::id(s));
+      boost::split(strs, args.at("-sport_type"), boost::is_any_of(","));
+      for(auto s : strs) {
+        sport_type_ids.push_back(Helper::SportType::id(s));
+      }
     }
   }
   catch (std::out_of_range&) {

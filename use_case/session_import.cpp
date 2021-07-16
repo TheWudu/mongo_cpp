@@ -34,6 +34,10 @@ void UseCase::SessionImport::read_files() {
     rs.id          = json_data["id"];
     rs.distance    = json_data["distance"];
     rs.duration    = json_data["duration"];
+    if(json_data["elevation_gain"] != nullptr) {
+      rs.elevation_gain = json_data["elevation_gain"];
+      rs.elevation_loss = json_data["elevation_loss"];
+    }
     int64_t start_timestamp       = json_data["start_time"];
     int64_t end_timestamp         = json_data["end_time"];
     rs.start_time_timezone_offset = json_data["start_time_timezone_offset"];

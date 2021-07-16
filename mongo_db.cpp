@@ -20,6 +20,7 @@
 
 #include "helper/time_converter.hpp"
 #include "helper/sport_types.hpp"
+#include "output.hpp"
 
 using namespace mongocxx;
 
@@ -80,6 +81,8 @@ void MongoDB::insert(Models::Session rs) {
     << "start_time_timezone_offset" << rs.start_time_timezone_offset
     << "distance" << rs.distance
     << "duration" << rs.duration
+    << "elevation_gain" << rs.elevation_gain
+    << "elevation_loss" << rs.elevation_loss
     << "sport_type_id" << rs.sport_type_id;
   
   if(rs.notes.size() > 0) {
@@ -157,6 +160,8 @@ void MongoDB::build_session(bsoncxx::v_noabi::document::view data, Models::Sessi
   session->end_time =  ms / 1000;
   session->distance = data["distance"].get_int32().value;
   session->duration = data["duration"].get_int32().value;
+  session->elevation_gain = data["elevation_gain"].get_int32().value;
+  session->elevation_loss = data["elevation_loss"].get_int32().value;
   if(data["notes"]) {
     session->notes    = data["notes"].get_utf8().value.to_string();
   }
@@ -189,9 +194,7 @@ void MongoDB::list_sessions(time_t from, time_t to, int sport_type_id) {
     sessions.push_back(rs);
   }
 
-  for(auto session: sessions) {
-    session.print();
-  }
+  Output::print_session_list(sessions);
 }
 
 template <class T>
@@ -215,18 +218,32 @@ void MongoDB::aggregate_stats(std::vector<int> years, std::vector<int> sport_typ
     { $project: { overall_distance: "$overall_distance", overall_duration: "$overall_duration", overall_count: "$overall_count", avg_distance: { $divide: [ "$overall_distance", "$overall_count" ] }, average_pace: { $divide: [ "$overall_duration", "$overall_distance"] } } } 
   ] years
 */
+  auto matcher = bsoncxx::builder::stream::document {};
+  if(sport_type_ids.size() > 0) {
+    matcher << "sport_type_id" << open_document <<
+      "$in" << vector_to_array(sport_type_ids) << close_document;
+  }
+  if(years.size() > 0) {
+    matcher << "year" << open_document <<
+      "$in" << vector_to_array(years) << close_document;
+  }
 
-  p.match(make_document(kvp("sport_type_id", make_document(kvp("$in", vector_to_array(sport_type_ids)))), kvp("year",make_document(kvp("$in", vector_to_array(years))))));
+  p.match(matcher.view());
   p.group(make_document(kvp("_id", make_document(kvp("sport_type_id", "$sport_type_id"), kvp("year", "$year"))), 
                         kvp("overall_distance", make_document(kvp("$sum", "$distance"))),
                         kvp("overall_duration", make_document(kvp("$sum", "$duration"))),
+                        kvp("overall_elevation_gain", make_document(kvp("$sum", "$elevation_gain"))),
+                        kvp("overall_elevation_loss", make_document(kvp("$sum", "$elevation_loss"))),
                         kvp("overall_count", make_document(kvp("$sum", 1)))
           ));
   p.project(make_document(kvp("overall_distance", "$overall_distance"),
                           kvp("overall_duration", "$overall_duration"),
+                          kvp("overall_elevation_gain", "$overall_elevation_gain"),
+                          kvp("overall_elevation_loss", "$overall_elevation_loss"),
                           kvp("overall_count", "$overall_count"),
                           kvp("average_distance", make_document(kvp("$divide", make_array("$overall_distance","$overall_count")))),
-                          kvp("average_pace", make_document(kvp("$divide", make_array("$overall_duration","$overall_distance"))))
+                          kvp("average_pace", make_document(kvp("$cond", make_array(make_document(kvp("$eq", make_array("$overall_distance", 0))), 0.0, make_document(kvp("$divide", make_array("$overall_duration","$overall_distance")))))))
+
   ));
   p.sort(make_document(kvp("_id.year", 1)));
 
@@ -234,20 +251,23 @@ void MongoDB::aggregate_stats(std::vector<int> years, std::vector<int> sport_typ
 
   auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
   for(auto doc : cursor) {
-    // std::cout << bsoncxx::to_json(doc) << "\n";
 
     std::stringstream ss;
     ss <<  doc["_id"]["year"].get_int32().value << "/" << Helper::SportType::name(doc["_id"]["sport_type_id"].get_int32().value);
     std::string id = ss.str();
     int32_t overall_distance = doc["overall_distance"].get_int32().value;
     int32_t overall_duration = doc["overall_duration"].get_int32().value;
+    int32_t overall_elevation_gain = doc["overall_elevation_gain"].get_int32().value;
+    int32_t overall_elevation_loss = doc["overall_elevation_loss"].get_int32().value;
     int32_t overall_count    = doc["overall_count"].get_int32().value;
     double average_distance  = doc["average_distance"].get_double().value;
     double average_pace      = doc["average_pace"].get_double().value;
 
     std::cout << id << " (#" << overall_count << ")" << std::endl
-      << "  overall_distance: " << std::setw(10) << overall_distance / 1000 << " [km], overall_duration: " << Helper::TimeConverter::ms_to_min_str(overall_duration) << std::endl
-      << "  average_distance: " << std::setw(10) << average_distance / 1000 << " [km], average_pace:     " << Helper::TimeConverter::secs_to_min_str(average_pace) << std::endl
+      << "  overall_distance:       " << std::setw(10) << overall_distance / 1000 << " [km], overall_duration:       " << Helper::TimeConverter::ms_to_min_str(overall_duration) << std::endl
+      << "  overall_elevation_gain: " << std::setw(10) << overall_elevation_gain  << " [m],  overall_elevation_loss: " << overall_elevation_loss << " [m]" << std::endl
+      << "  average_distance:       " << std::setw(10) << average_distance / 1000 << " [km], average_pace:           " << Helper::TimeConverter::secs_to_min_str(average_pace) << std::endl
+      << "  distance per session:   " << std::setw(10) << overall_distance / overall_count << std::endl
       << std::endl;
   }
 
@@ -267,8 +287,17 @@ void MongoDB::aggregate_weekdays(std::vector<int> years, std::vector<int> sport_
     ])
   */
 
-  // p.match(make_document(kvp("sport_type_id", make_document(kvp("$in", vector_to_array(sport_type_ids)))), kvp("year",make_document(kvp("$in", vector_to_array(years))))));
-  p.match(make_document(kvp("sport_type_id", make_document(kvp("$in", vector_to_array(sport_type_ids)))), kvp("year",make_document(kvp("$in", vector_to_array(years))))));
+  auto matcher = bsoncxx::builder::stream::document {};
+  if(sport_type_ids.size() > 0) {
+    matcher << "sport_type_id" << open_document <<
+      "$in" << vector_to_array(sport_type_ids) << close_document;
+  }
+  if(years.size() > 0) {
+    matcher << "year" << open_document <<
+      "$in" << vector_to_array(years) << close_document;
+  }
+
+  p.match(matcher.view());
   p.add_fields(make_document(kvp("weekday", make_document(kvp("$dayOfWeek", "$start_time")))));
   p.group(make_document(kvp("_id", "$weekday"), 
                         kvp("count", make_document(kvp("$sum", 1)))
@@ -295,13 +324,17 @@ void MongoDB::aggregate_weekdays(std::vector<int> years, std::vector<int> sport_
   daycount.push_back(sunday);
 
   std::cout << "Sessions per weekday: " << std::endl << std::endl;
+  int range = max_val - min_val + 10;
+  int steps = range / 50 + 1;
   for(uint32_t i = 0; i < daycount.size(); i++) {
     int val = daycount.at(i);
+  
+    int stars = (val - min_val) / steps + 5;
 
     std::cout << std::setfill(' ') 
       << std::setw(10) << Helper::TimeConverter::weekday_name(i) 
       << std::setw(2) << "(" << std::setw(2) << val << ") |"
-      << std::setw(val - min_val + 5) << std::setfill('*') << "\n";
+      << std::setw(stars) << std::setfill('*') << "\n";
   }
   std::cout << std::endl;
 }

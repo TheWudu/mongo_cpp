@@ -8,7 +8,7 @@ CC = g++
 CFLAGS= -g -Wall --std=c++17
 MONGOFLAGS=$(shell pkg-config --cflags --libs libmongocxx)
 
-SRC = mongo_db.cpp use_cases.cpp main.cpp
+SRC = mongo_db.cpp use_cases.cpp output.cpp main.cpp
 MODEL_SRC = models/weight.cpp models/session.cpp
 JSON_SRC = file_list.cpp json_parser.cpp
 HELPER_SRC = helper/time_converter.cpp helper/menu.cpp

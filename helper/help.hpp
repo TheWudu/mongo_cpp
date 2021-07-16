@@ -59,8 +59,8 @@ void show_help_stats() {
   std::cout << "Show some statistics like overall distance, duration, count, \n"
             << "and others. \n"
             << "Possible parameters are: \n"
-            << "  -year=YYYY[,YYYY]       e.g. 2021,2020,       default: this year. \n"
-            << "  -sport_type=type[,type] e.g. running,cycling  default: running. \n"
+            << "  -year=YYYY[,YYYY]       e.g. 2021,2020 or all       default: this year. \n"
+            << "  -sport_type=type[,type] e.g. running,cycling or all default: running. \n"
             << std::endl;
 }
 
