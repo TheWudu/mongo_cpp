@@ -26,6 +26,7 @@ void list_sessions(std::map<std::string, std::string> const args) {
   time_t from; 
   time_t to;
   std::vector<int> sport_type_ids;
+  std::string notes;
 
   try { 
     from = Helper::TimeConverter::string_to_time_t(args.at("-from"));
@@ -56,12 +57,18 @@ void list_sessions(std::map<std::string, std::string> const args) {
   catch (std::out_of_range&) {
     // sport_type_ids.push_back(1); // running
   }
+
+  try {
+    notes = args.at("-notes");
+  }
+  catch (std::out_of_range&) {
+  }
   
   std::cout << "Fetching from: " << ctime(&from) 
             << "         to:   " << ctime(&to) 
             << std::endl;
 
-  mc->list_sessions(from, to, sport_type_ids);
+  mc->list_sessions(from, to, sport_type_ids, notes);
 }
 
 void show_session(std::map<std::string, std::string> const args) {
