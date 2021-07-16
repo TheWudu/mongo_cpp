@@ -168,18 +168,20 @@ void MongoDB::build_session(bsoncxx::v_noabi::document::view data, Models::Sessi
   session->sport_type_id = data["sport_type_id"].get_int32().value;
 }
 
-void MongoDB::list_sessions(time_t from, time_t to, int sport_type_id) {
+void MongoDB::list_sessions(time_t from, time_t to, std::vector<int> sport_type_ids) {
    auto builder = bsoncxx::builder::stream::document{};
    auto doc = builder << "start_time"   << open_document 
       << "$gte" << time_t_to_b_date(from)
       << "$lte" << time_t_to_b_date(to)
       << close_document;
-  if(sport_type_id != 0) {
-    doc << "sport_type_id" << sport_type_id;
+
+  if(sport_type_ids.size() > 0) {
+    doc << "sport_type_id" << 
+      open_document << "$in" << vector_to_array(sport_type_ids) << close_document;
   }
   auto query = doc << bsoncxx::builder::stream::finalize;
 
-  // std::cout << bsoncxx::to_json(query.view()) << "\n";
+  //std::cout << bsoncxx::to_json(query.view()) << "\n";
 
   auto coll = collection("sessions");
   mongocxx::cursor cursor = coll.find(query.view());

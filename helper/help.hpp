@@ -42,9 +42,9 @@ void show_help_weight_import() {
 void show_help_ls() {
   std::cout << "List sessions, lists all sessions matching the given filters. \n"
             << "Possible filters are: \n"
-            << "  -from=YYYY-MM-DD e.g. 2021-06-01, default: 30 days ago. \n"
-            << "  -to=YYYY-MM-DD   e.g. 2021-07-31, default: today. \n"
-            << "  -sport_type=type e.g. running,    default: none. \n"
+            << "  -from=YYYY-MM-DD        e.g. 2021-06-01, default: 30 days ago. \n"
+            << "  -to=YYYY-MM-DD          e.g. 2021-07-31, default: today. \n"
+            << "  -sport_type=type[,type] e.g. running    default: none. \n"
             << std::endl;
 }
 

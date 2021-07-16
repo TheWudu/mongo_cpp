@@ -25,7 +25,7 @@ void list_sessions(std::map<std::string, std::string> const args) {
   MongoDB* mc = MongoDB::connection();
   time_t from; 
   time_t to;
-  int    sport_type_id;
+  std::vector<int> sport_type_ids;
 
   try { 
     from = Helper::TimeConverter::string_to_time_t(args.at("-from"));
@@ -42,19 +42,26 @@ void list_sessions(std::map<std::string, std::string> const args) {
   catch (std::out_of_range&) {
     to = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   }
-  
+
   try { 
-    sport_type_id = Helper::SportType::id(args.at("-sport_type"));
+    if(args.at("-sport_type") != "all") {
+      std::vector<std::string> strs;
+
+      boost::split(strs, args.at("-sport_type"), boost::is_any_of(","));
+      for(auto s : strs) {
+        sport_type_ids.push_back(Helper::SportType::id(s));
+      }
+    }
   }
   catch (std::out_of_range&) {
-    sport_type_id = 0;
+    // sport_type_ids.push_back(1); // running
   }
   
   std::cout << "Fetching from: " << ctime(&from) 
             << "         to:   " << ctime(&to) 
             << std::endl;
 
-  mc->list_sessions(from, to, sport_type_id);
+  mc->list_sessions(from, to, sport_type_ids);
 }
 
 void show_session(std::map<std::string, std::string> const args) {
