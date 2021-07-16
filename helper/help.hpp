@@ -61,6 +61,7 @@ void show_help_stats() {
             << "Possible parameters are: \n"
             << "  -year=YYYY[,YYYY]       e.g. 2021,2020 or all       default: this year. \n"
             << "  -sport_type=type[,type] e.g. running,cycling or all default: running. \n"
+            << "  -group=x,y              e.g. year,month,sport_type_id, default: year,sport_type_id \n"
             << std::endl;
 }
 

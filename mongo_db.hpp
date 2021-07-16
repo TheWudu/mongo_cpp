@@ -54,7 +54,7 @@ public:
 
   bool exists(std::string colname, std::string id);
 
-  void aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids);
+  void aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping);
   void print_collection(std::string name);
 };
 

@@ -86,6 +86,13 @@ std::vector<int> arg_to_int_vec(std::map<std::string, std::string> const args, s
   return vec;
 }
 
+std::vector<std::string> arg_to_str_vec(std::map<std::string, std::string> const args, std::string param) {
+  std::vector<std::string> strs;
+
+  boost::split(strs, args.at(param), boost::is_any_of(","));
+  return strs;
+}
+
 int current_year() {
   time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   return gmtime(&now)->tm_year + 1900;
@@ -95,7 +102,15 @@ void show_statistics(std::map<std::string, std::string> const args) {
   MongoDB* mc = MongoDB::connection();
   std::vector<int> years;
   std::vector<int> sport_type_ids;
+  std::vector<std::string> grouping;
   
+  try { 
+    grouping = arg_to_str_vec(args,"-group");
+  }
+  catch (std::out_of_range&) {
+    grouping.push_back("year");
+    grouping.push_back("sport_type_id");
+  }
    
   try { 
     if(args.at("-year") != "all") {
@@ -120,5 +135,5 @@ void show_statistics(std::map<std::string, std::string> const args) {
     sport_type_ids.push_back(1); // running
   }
 
-  mc->aggregate_stats(years, sport_type_ids);
+  mc->aggregate_stats(years, sport_type_ids, grouping);
 }

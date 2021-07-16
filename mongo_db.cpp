@@ -206,7 +206,7 @@ bsoncxx::builder::basic::array MongoDB::vector_to_array(std::vector<T> vec) {
   return a;
 }
 
-void MongoDB::aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids) {
+void MongoDB::aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
   using namespace bsoncxx::builder::basic;
 
   mongocxx::pipeline p{};
@@ -228,8 +228,16 @@ void MongoDB::aggregate_stats(std::vector<int> years, std::vector<int> sport_typ
       "$in" << vector_to_array(years) << close_document;
   }
 
+  auto group_by = bsoncxx::builder::stream::document {};
+  auto sorter = bsoncxx::builder::stream::document {};
+  for(auto g : grouping) {
+    group_by << g << "$" + g;
+    sorter << "_id." + g << 1;
+  }
+  
+
   p.match(matcher.view());
-  p.group(make_document(kvp("_id", make_document(kvp("sport_type_id", "$sport_type_id"), kvp("year", "$year"))), 
+  p.group(make_document(kvp("_id", group_by.view()), 
                         kvp("overall_distance", make_document(kvp("$sum", "$distance"))),
                         kvp("overall_duration", make_document(kvp("$sum", "$duration"))),
                         kvp("overall_elevation_gain", make_document(kvp("$sum", "$elevation_gain"))),
@@ -245,15 +253,24 @@ void MongoDB::aggregate_stats(std::vector<int> years, std::vector<int> sport_typ
                           kvp("average_pace", make_document(kvp("$cond", make_array(make_document(kvp("$eq", make_array("$overall_distance", 0))), 0.0, make_document(kvp("$divide", make_array("$overall_duration","$overall_distance")))))))
 
   ));
-  p.sort(make_document(kvp("_id.year", 1)));
+  p.sort(sorter.view());
 
   std::cout << std::endl << "Track based statistics:" << std::endl << std::endl;
 
   auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
   for(auto doc : cursor) {
+    std::stringstream ss; 
+    for(uint32_t i = 0; i < grouping.size(); i++) {    
+      int v = doc["_id"][grouping.at(i)].get_int32().value;
+      if(grouping.at(i) == "sport_type_id") {
+        ss << Helper::SportType::name(v); 
+      }
+      else {
+        ss << v;
+      }
+      if((i+1) < grouping.size()) { ss << "/"; }
+    }
 
-    std::stringstream ss;
-    ss <<  doc["_id"]["year"].get_int32().value << "/" << Helper::SportType::name(doc["_id"]["sport_type_id"].get_int32().value);
     std::string id = ss.str();
     int32_t overall_distance = doc["overall_distance"].get_int32().value;
     int32_t overall_duration = doc["overall_duration"].get_int32().value;
