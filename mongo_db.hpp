@@ -24,7 +24,9 @@ private:
   template <class T>
   bsoncxx::builder::basic::array vector_to_array(std::vector<T> vec);
 
+  void aggregate_basic_statistics(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping);
   void aggregate_weekdays(std::vector<int> years, std::vector<int> sport_type_ids);
+  void aggregate_hour_of_day(std::vector<int> years, std::vector<int> sport_type_ids);
 
 public:
 

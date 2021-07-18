@@ -39,17 +39,38 @@ std::string Helper::TimeConverter::secs_to_min_str( uint32_t secs ) {
   return ss.str();
 }
 
+std::string Helper::TimeConverter::hour_to_time_str(uint32_t hour) {
+  std::stringstream ss;
+  ss << std::setw(2) << std::setfill('0') << hour << ":00" << std::setfill(' ');
+  return ss.str();
+}
 
-std::string Helper::TimeConverter::weekday_name(int i) {
+
+/*
+ Mongo starts with Sunday (1) and ends on Saturday (7)
+*/
+std::string Helper::TimeConverter::mongo_idx_to_weekday_name(int i) {
   static std::vector<std::string> weekday_strings = {
+    "Sunday",
     "Monday",
     "Tuesday",
     "Wednesday",
     "Thursday",
     "Friday",
     "Saturday",
-    "Sunday"
   };
-  return weekday_strings.at(i);
+  return weekday_strings.at(i - 1);
 }
 
+int Helper::TimeConverter::weekday_to_idx(std::string name) {
+  static std::map<std::string, int> mapping = {
+    { "Monday",    0 },
+    { "Tuesday",   1 },
+    { "Wednesday", 2 },
+    { "Thursday",  3 },
+    { "Friday",    4 },
+    { "Saturday",  5 },
+    { "Sunday",    6 }
+  };
+  return mapping[name];
+}

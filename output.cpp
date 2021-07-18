@@ -22,3 +22,27 @@ void Output::print_session_list(std::vector<Models::Session> sessions) {
   }
   cout << endl;
 }
+
+void Output::print_vector(std::string title, std::vector<std::pair<std::string, int>> vec) {
+  int min_val = 0;
+  int max_val = 0;
+    
+  for(const auto& [name, value] : vec) {
+    if(value > max_val) { max_val = value; }
+    if(value < min_val || min_val == 0) { min_val = value; }
+  }
+  int range = max_val - min_val + 10;
+  int steps = range / 50 + 1;
+
+  std::cout << title << ":" << std::endl << std::endl;
+
+  for(const auto& [name, value] : vec) {
+    int stars = (value - min_val) / steps + 5;
+
+    std::cout << std::setfill(' ') 
+      << std::setw(10) << name // Helper::TimeConverter::weekday_name(i) 
+      << std::setw(2) << "(" << std::setw(2) << value << ") |"
+      << std::setw(stars) << std::setfill('*') << "\n";
+  }
+  std::cout << std::endl;
+}

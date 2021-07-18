@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <vector>
+#include <utility> // for std::pair
 
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
@@ -212,6 +213,14 @@ bsoncxx::builder::basic::array MongoDB::vector_to_array(std::vector<T> vec) {
 }
 
 void MongoDB::aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
+
+  aggregate_basic_statistics(years, sport_type_ids, grouping);
+  aggregate_weekdays(years, sport_type_ids);
+  aggregate_hour_of_day(years, sport_type_ids);
+}
+ 
+ 
+void MongoDB::aggregate_basic_statistics(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
   using namespace bsoncxx::builder::basic;
 
   mongocxx::pipeline p{};
@@ -292,8 +301,12 @@ void MongoDB::aggregate_stats(std::vector<int> years, std::vector<int> sport_typ
       << std::endl;
   }
 
-  aggregate_weekdays(years, sport_type_ids);
 }
+
+bool weekday_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
+  return (Helper::TimeConverter::weekday_to_idx(a.first) < Helper::TimeConverter::weekday_to_idx(b.first)); 
+}
+
 
 void MongoDB::aggregate_weekdays(std::vector<int> years, std::vector<int> sport_type_ids) {
   using namespace bsoncxx::builder::basic;
@@ -326,37 +339,62 @@ void MongoDB::aggregate_weekdays(std::vector<int> years, std::vector<int> sport_
   p.sort(make_document(kvp("_id", 1)));
 
   auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
-  std::vector<int> daycount;
-  int min_val = 0;
-  int max_val = 0;
-    
+
+  std::vector<std::pair<std::string, int>> dayvec;
   for(auto doc : cursor) {
-    // std::cout << bsoncxx::to_json(doc) << "\n";
     int val = doc["count"].get_int32().value;
 
-    if(val > max_val) { max_val = val; }
-    if(val < min_val || min_val == 0) { min_val = val; }
-
-    daycount.push_back(val);
+    std::string dayname = Helper::TimeConverter::mongo_idx_to_weekday_name(doc["_id"].get_int32().value);
+    dayvec.push_back(std::make_pair(dayname, val));
   }
-  
-  int sunday = daycount.at(0);
-  daycount.erase(daycount.begin());
-  daycount.push_back(sunday);
 
-  std::cout << "Sessions per weekday: " << std::endl << std::endl;
-  int range = max_val - min_val + 10;
-  int steps = range / 50 + 1;
-  for(uint32_t i = 0; i < daycount.size(); i++) {
-    int val = daycount.at(i);
-  
-    int stars = (val - min_val) / steps + 5;
+  std::sort(dayvec.begin(), dayvec.end(), weekday_sort);
 
-    std::cout << std::setfill(' ') 
-      << std::setw(10) << Helper::TimeConverter::weekday_name(i) 
-      << std::setw(2) << "(" << std::setw(2) << val << ") |"
-      << std::setw(stars) << std::setfill('*') << "\n";
-  }
-  std::cout << std::endl;
+  Output::print_vector("Sessions per weekday", dayvec);
 }
-   
+
+void MongoDB::aggregate_hour_of_day(std::vector<int> years, std::vector<int> sport_type_ids) {
+  using namespace bsoncxx::builder::basic;
+
+  mongocxx::pipeline p{};
+
+  /*
+    db.sessions.aggregate([ 
+      { $match: { year: 2021, month: 7, sport_type_id: 1 } }, 
+      { $addFields: { hour: { $hour: "$start_time" } } }, 
+      { $group: { _id: "$hour", cnt: { $sum: 1 } } } 
+    ])
+  */
+
+  auto matcher = bsoncxx::builder::stream::document {};
+  if(sport_type_ids.size() > 0) {
+    matcher << "sport_type_id" << open_document <<
+      "$in" << vector_to_array(sport_type_ids) << close_document;
+  }
+  if(years.size() > 0) {
+    matcher << "year" << open_document <<
+      "$in" << vector_to_array(years) << close_document;
+  }
+
+  p.match(matcher.view());
+  p.add_fields(make_document(kvp("hour", 
+    make_document(kvp("$hour", 
+      make_document(kvp("date", "$start_time"),kvp("timezone", "Europe/Vienna"))))
+    )));
+  p.group(make_document(kvp("_id", "$hour"), 
+                        kvp("count", make_document(kvp("$sum", 1)))
+          ));
+  p.sort(make_document(kvp("_id", 1)));
+
+  auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+
+  std::vector<std::pair<std::string, int>> hourvec;
+  for(auto doc : cursor) {
+    int val = doc["count"].get_int32().value;
+    int hour = doc["_id"].get_int32().value;
+
+    hourvec.push_back(make_pair(Helper::TimeConverter::hour_to_time_str(hour), val));
+  }
+
+  Output::print_vector("Sessions per hour of day", hourvec);
+}
