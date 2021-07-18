@@ -20,13 +20,11 @@ exported recently and had that data in my hands when starting this.
 
 Some more things I will provide most likely:
 
-* some more aggregations and filtering on them
+* Refactoring, cleanup
 
 ## TODO
 
-* add more aggregations and filtering
-* format aggregation output properly
-* add usage message for command line args
+* Any ideas?
 
 ## Setup
 
