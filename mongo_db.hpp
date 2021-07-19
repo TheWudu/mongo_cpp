@@ -26,6 +26,9 @@ private:
 
   template <class T>
   bsoncxx::builder::basic::array vector_to_array(std::vector<T> vec);
+  bsoncxx::types::b_date time_t_to_b_date(time_t time);
+
+  static bool weekday_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b);
 
   void aggregate_basic_statistics(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping);
   void aggregate_weekdays(std::vector<int> years, std::vector<int> sport_type_ids);

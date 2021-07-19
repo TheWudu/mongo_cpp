@@ -55,7 +55,6 @@ void list_sessions(std::map<std::string, std::string> const args) {
     }
   }
   catch (std::out_of_range&) {
-    // sport_type_ids.push_back(1); // running
   }
 
   try {

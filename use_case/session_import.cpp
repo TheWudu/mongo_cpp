@@ -48,8 +48,6 @@ void UseCase::SessionImport::read_files() {
       rs.notes         = json_data["notes"];
     }
 
-    // rs.print();
-
     this->data.push_back(rs);
   }
 

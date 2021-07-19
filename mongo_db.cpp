@@ -64,7 +64,7 @@ void MongoDB::insert(Models::Weight weight) {
   bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc_value.view());
 }
   
-bsoncxx::types::b_date time_t_to_b_date(time_t time) {
+bsoncxx::types::b_date MongoDB::time_t_to_b_date(time_t time) {
   std::chrono::system_clock::time_point tp = std::chrono::system_clock::from_time_t(time);
   bsoncxx::types::b_date timedate = bsoncxx::types::b_date { tp };
   return timedate;
@@ -148,9 +148,7 @@ bool MongoDB::exists(std::string colname, std::string id) {
   if(count == 1) { 
     return true;
   }
-  else {
-      return false;
-  }
+  return false;
 }
 
 void MongoDB::build_session(bsoncxx::v_noabi::document::view data, Models::Session* session) {
@@ -170,20 +168,17 @@ void MongoDB::build_session(bsoncxx::v_noabi::document::view data, Models::Sessi
 }
 
 void MongoDB::list_sessions(time_t from, time_t to, std::vector<int> sport_type_ids, std::string notes) {
-   auto builder = bsoncxx::builder::stream::document{};
-   auto doc = builder << "start_time"   << open_document 
+  auto matcher = bsoncxx::builder::stream::document{};
+  matcher << "start_time"   << open_document 
       << "$gte" << time_t_to_b_date(from)
       << "$lte" << time_t_to_b_date(to)
       << close_document;
+  sport_type_matcher(matcher, sport_type_ids);
 
-  if(sport_type_ids.size() > 0) {
-    doc << "sport_type_id" << 
-      open_document << "$in" << vector_to_array(sport_type_ids) << close_document;
-  }
   if(notes.size() > 0) {
-    doc << "notes" << bsoncxx::types::b_regex{notes}; 
+    matcher << "notes" << bsoncxx::types::b_regex{notes}; 
   }
-  auto query = doc << bsoncxx::builder::stream::finalize;
+  auto query = matcher << bsoncxx::builder::stream::finalize;
 
   // std::cout << bsoncxx::to_json(query.view()) << "\n";
 
@@ -234,12 +229,6 @@ void MongoDB::year_matcher(bsoncxx::builder::stream::document& matcher, std::vec
   }
 }
  
- 
-void MongoDB::aggregate_basic_statistics(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
-  using namespace bsoncxx::builder::basic;
-
-  mongocxx::pipeline p{};
-
 /* 
   db.sessions.aggregate([ 
     { $match: { "sport_type_id": { $in: [1,3,4,19] }, "start_time": { $gt: ISODate("2021-04-01"), $lt: ISODate("2022-01-01") } } }, 
@@ -247,12 +236,16 @@ void MongoDB::aggregate_basic_statistics(std::vector<int> years, std::vector<int
     { $project: { overall_distance: "$overall_distance", overall_duration: "$overall_duration", overall_count: "$overall_count", avg_distance: { $divide: [ "$overall_distance", "$overall_count" ] }, average_pace: { $divide: [ "$overall_duration", "$overall_distance"] } } } 
   ] years
 */
+void MongoDB::aggregate_basic_statistics(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
+  using namespace bsoncxx::builder::basic;
+
+  mongocxx::pipeline p{};
   auto matcher = bsoncxx::builder::stream::document {};
   sport_type_matcher(matcher, sport_type_ids);
   year_matcher(matcher, years);
 
   auto group_by = bsoncxx::builder::stream::document {};
-  auto sorter = bsoncxx::builder::stream::document {};
+  auto sorter   = bsoncxx::builder::stream::document {};
   for(auto g : grouping) {
     group_by << g << "$" + g;
     sorter << "_id." + g << 1;
@@ -282,7 +275,7 @@ void MongoDB::aggregate_basic_statistics(std::vector<int> years, std::vector<int
   Output::print_track_based_stats(cursor, grouping); 
 }
 
-bool weekday_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
+bool MongoDB::weekday_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
   return (Helper::TimeConverter::weekday_to_idx(a.first) < Helper::TimeConverter::weekday_to_idx(b.first)); 
 }
 
