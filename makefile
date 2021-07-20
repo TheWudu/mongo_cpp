@@ -29,9 +29,9 @@ muh:
 	@echo "BUILD_DIR:" $(BUILD_DIR)
 
 
-all: checkdirs build/run
+all: checkdirs run
 
-build/run: $(OBJ)
+run: $(OBJ)
 	$(LD) $^ $(CFLAGS) $(MONGOFLAGS) -lboost_date_time -o $@
 
 checkdirs: $(BUILD_DIR)
@@ -40,7 +40,7 @@ $(BUILD_DIR):
 	@mkdir -p $@
 
 clean:
-	@rm -rf $(BUILD_DIR)
+	@rm -rf build/*
 
 $(foreach bdir,$(BUILD_DIR), $(eval $(call make-goal,$(bdir))))
 
