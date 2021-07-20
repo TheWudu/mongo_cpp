@@ -47,11 +47,15 @@ https://github.com/nlohmann/json
 This project provides a simple makefile to compile the source files
 and link it together into the `run` executable.
 
+```
 $ make all
+```
 
 Run it:
 
+```
 $ ./run
+```
 
 ## Structure
 
