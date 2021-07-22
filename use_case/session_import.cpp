@@ -1,24 +1,80 @@
+#include <fstream>
+#include <iostream>
+#include <boost/algorithm/string.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp> 
+
 #include "session_import.hpp"
+
 
 #include "../ext/json.hpp"
 #include "../mongo_db.hpp"
 #include "../file_list.hpp"
 #include "../json_parser.hpp"
+#include "../helper/time_converter.hpp"
+#include "../helper/sport_types.hpp"
 
 #include "../models/session.hpp"
 
 using json = nlohmann::json;
 
-bool session_sort (Models::Session a, Models::Session b) { 
+bool UseCase::SessionImport::session_sort (Models::Session a, Models::Session b) { 
   return (a.start_time < b.start_time); 
 }
 
 void UseCase::SessionImport::import() {
-    read_files();
+    // read_runtastic_files();
+    read_garmin_csv();
     store_to_mongo();
 }
 
-void UseCase::SessionImport::read_files() {
+void UseCase::SessionImport::read_garmin_csv() {
+  std::string line;
+  std::vector<std::string> strs;
+
+  std::ifstream filestream("data/garmin_activities.csv");
+
+  while (getline (filestream, line)) {
+    std::cout << line << std::endl;
+
+    boost::split(strs, line, boost::is_any_of(","));
+
+    int i = 0;
+    std::vector<std::string> strings;
+    for(auto s : strs) {
+      s.erase(remove(s.begin(), s.end(), '"'), s.end());
+      // std::cout << i++ << "  " << s << std::endl;
+      
+      strings.push_back(s);
+    }
+      
+    if(strs[0] != "Activity Type") {
+      std::string dist = strings[4];
+      dist.erase(remove(dist.begin(), dist.end(), '"'), dist.end());
+
+      Models::Session rs;
+      // rs.id          = 
+      rs.sport_type_id  = Helper::SportType::id(strings[0]); 
+      rs.distance       = std::stof(dist) * 1000;
+      rs.duration       = Helper::TimeConverter::time_str_to_ms(strings[6]);
+      rs.elevation_gain = strings[14] == "--" ? 0 : std::stoi(strings[14]);
+      rs.elevation_loss = strings[15] == "--" ? 0 : std::stoi(strings[15]);
+      rs.start_time_timezone_offset = 7200;
+      rs.start_time     = Helper::TimeConverter::date_time_string_to_time_t(strings[1]) - rs.start_time_timezone_offset;
+      rs.end_time       = rs.start_time + rs.duration / 1000;
+      rs.notes          = strings[3]; 
+
+      rs.print();
+
+      this->data.push_back(rs);
+    }
+    std::cout << std::endl;
+  }
+
+  filestream.close();  
+}
+
+void UseCase::SessionImport::read_runtastic_files() {
   FileList file_list = FileList("data/Sport-sessions");
 
   std::vector<std::string> files = file_list.files();
@@ -61,8 +117,9 @@ void UseCase::SessionImport::store_to_mongo() {
   int fcnt = 0;
 
   for(auto rs = this->data.begin(); rs != this->data.end(); rs++) {
-    if (mc->exists(collection, rs->id) == false) {
-      mc->insert(*rs);
+    if (mc->exists(rs->start_time, rs->sport_type_id) == false) {
+      // mc->insert(*rs);
+      std::cout << "Insert: " << rs->sport_type_id << " - " << Helper::TimeConverter::time_to_string(rs->start_time) << std::endl;
       icnt++;
     } else {
       fcnt++;

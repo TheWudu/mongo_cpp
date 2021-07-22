@@ -67,6 +67,7 @@ public:
   bool find(std::string id, Models::Session* session);
 
   bool exists(std::string colname, std::string id);
+  bool exists(time_t start_time, int sport_type_id); 
 
   void aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping);
   void print_collection(std::string name);

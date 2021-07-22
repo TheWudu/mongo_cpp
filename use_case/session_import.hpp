@@ -10,8 +10,13 @@ namespace UseCase {
 
   private:
 
-    void read_files();
+    void import_runtastic();
+
+    void read_runtastic_files();
+    void read_garmin_csv();
     void store_to_mongo();
+
+    static bool session_sort (Models::Session a, Models::Session b);
 
     std::vector<Models::Session> data;
   };

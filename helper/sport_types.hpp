@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <boost/algorithm/string.hpp>
 
 namespace Helper {
 
@@ -20,6 +21,7 @@ namespace Helper {
     static int id(std::string name) {
       try {
         for(auto const& [k,v] : sport_types()) {
+          boost::algorithm::to_lower(name);
           if(v == name) {
             return k;
           }

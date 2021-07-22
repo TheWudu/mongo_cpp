@@ -3,14 +3,23 @@
 #include <sstream>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/algorithm/string.hpp>
 
 std::string Helper::TimeConverter::time_to_string(const time_t time) {
   char buf[19];
   struct tm * timeinfo = localtime(&time);
-  strftime(buf, sizeof(buf), "%Y-%m-%dT%H-%MZ", timeinfo);
+  strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%MZ", timeinfo);
 
   return std::string { buf };
 }
+
+time_t Helper::TimeConverter::date_time_string_to_time_t(const std::string time_str) {
+  boost::posix_time::ptime pt(boost::posix_time::time_from_string(time_str));
+  static boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
+  boost::posix_time::time_duration::sec_type secs = (pt - epoch).total_seconds();
+  return time_t(secs);
+}
+
 
 time_t Helper::TimeConverter::string_to_time_t( const std::string time_str ) {
 
@@ -73,4 +82,20 @@ int Helper::TimeConverter::weekday_to_idx(std::string name) {
     { "Sunday",    6 }
   };
   return mapping[name];
+}
+
+
+int Helper::TimeConverter::time_str_to_ms(std::string time) {
+  std::vector<std::string> strs;
+  
+  std::cout << time << std::endl;
+  boost::split(strs, time, boost::is_any_of(":"));
+
+  int ms = 0;
+  for(auto s : strs) {
+    ms *= 60;
+    int v = std::stoi(s);
+    ms += v;
+  }
+  return ms * 1000;
 }

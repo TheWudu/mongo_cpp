@@ -137,6 +137,24 @@ bool MongoDB::find(std::string id, Models::Session* rs) {
   }
 }
 
+bool MongoDB::exists(time_t start_time, int sport_type_id) {
+  bsoncxx::document::value query = document{} 
+    << "start_time"    << time_t_to_b_date(start_time)
+    << "sport_type_id" << sport_type_id 
+    << bsoncxx::builder::stream::finalize;
+  
+  auto coll = collection("sessions");
+  int64_t count = coll.count_documents(query.view());
+
+  std::cout << bsoncxx::to_json(query.view()) << std::endl
+            << "  " << count << std::endl;
+ 
+  if(count == 1) { 
+    return true;
+  }
+  return false;
+}
+
 bool MongoDB::exists(std::string colname, std::string id) {
   bsoncxx::document::value query = document{} 
     << "id"   << id
