@@ -56,6 +56,8 @@ public:
   
   mongocxx::collection collection(std::string name);
 
+  static std::string new_object_id();
+
   void insert(Models::Weight weight);
   void insert(Models::Session session);
 

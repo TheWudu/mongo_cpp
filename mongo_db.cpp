@@ -70,6 +70,11 @@ bsoncxx::types::b_date MongoDB::time_t_to_b_date(time_t time) {
   return timedate;
 }
 
+std::string MongoDB::new_object_id() {
+  bsoncxx::oid oid{};
+  return oid.to_string();
+}
+
 void MongoDB::insert(Models::Session rs) {
   auto builder = bsoncxx::builder::stream::document{};
 
@@ -137,13 +142,26 @@ bool MongoDB::find(std::string id, Models::Session* rs) {
   }
 }
 
+
 bool MongoDB::exists(time_t start_time, int sport_type_id) {
   bsoncxx::document::value query = document{} 
-    << "start_time"    << time_t_to_b_date(start_time)
+    << "start_time"   << open_document 
+      << "$gte" << time_t_to_b_date(start_time - 60)
+      << "$lte" << time_t_to_b_date(start_time + 60)
+      << close_document
     << "sport_type_id" << sport_type_id 
     << bsoncxx::builder::stream::finalize;
   
   auto coll = collection("sessions");
+
+  auto res = coll.find_one(query.view());
+  if(res) {
+    std::cout << bsoncxx::to_json(res->view()) << std::endl;
+  }
+  else {
+    std::cout << "Not found" << std::endl;
+  }
+  
   int64_t count = coll.count_documents(query.view());
 
   std::cout << bsoncxx::to_json(query.view()) << std::endl
@@ -198,10 +216,17 @@ void MongoDB::list_sessions(time_t from, time_t to, std::vector<int> sport_type_
   }
   auto query = matcher << bsoncxx::builder::stream::finalize;
 
+  auto order = bsoncxx::builder::stream::document{} 
+    << "start_time" << 1 
+    << bsoncxx::builder::stream::finalize;
+
+  auto opts = mongocxx::options::find{};
+  opts.sort(order.view());
+
   // std::cout << bsoncxx::to_json(query.view()) << "\n";
 
   auto coll = collection("sessions");
-  mongocxx::cursor cursor = coll.find(query.view());
+  mongocxx::cursor cursor = coll.find(query.view(), opts);
 
   std::vector<Models::Session> sessions;
   

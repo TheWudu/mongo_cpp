@@ -39,11 +39,9 @@ void UseCase::SessionImport::read_garmin_csv() {
 
     boost::split(strs, line, boost::is_any_of(","));
 
-    int i = 0;
     std::vector<std::string> strings;
     for(auto s : strs) {
       s.erase(remove(s.begin(), s.end(), '"'), s.end());
-      // std::cout << i++ << "  " << s << std::endl;
       
       strings.push_back(s);
     }
@@ -53,7 +51,7 @@ void UseCase::SessionImport::read_garmin_csv() {
       dist.erase(remove(dist.begin(), dist.end(), '"'), dist.end());
 
       Models::Session rs;
-      // rs.id          = 
+      rs.id             = MongoDB::new_object_id();
       rs.sport_type_id  = Helper::SportType::id(strings[0]); 
       rs.distance       = std::stof(dist) * 1000;
       rs.duration       = Helper::TimeConverter::time_str_to_ms(strings[6]);
@@ -118,8 +116,7 @@ void UseCase::SessionImport::store_to_mongo() {
 
   for(auto rs = this->data.begin(); rs != this->data.end(); rs++) {
     if (mc->exists(rs->start_time, rs->sport_type_id) == false) {
-      // mc->insert(*rs);
-      std::cout << "Insert: " << rs->sport_type_id << " - " << Helper::TimeConverter::time_to_string(rs->start_time) << std::endl;
+       mc->insert(*rs);
       icnt++;
     } else {
       fcnt++;
