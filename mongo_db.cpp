@@ -154,18 +154,7 @@ bool MongoDB::exists(time_t start_time, int sport_type_id) {
   
   auto coll = collection("sessions");
 
-  auto res = coll.find_one(query.view());
-  if(res) {
-    std::cout << bsoncxx::to_json(res->view()) << std::endl;
-  }
-  else {
-    std::cout << "Not found" << std::endl;
-  }
-  
   int64_t count = coll.count_documents(query.view());
-
-  std::cout << bsoncxx::to_json(query.view()) << std::endl
-            << "  " << count << std::endl;
  
   if(count == 1) { 
     return true;

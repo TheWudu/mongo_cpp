@@ -23,7 +23,7 @@ bool UseCase::SessionImport::session_sort (Models::Session a, Models::Session b)
 }
 
 void UseCase::SessionImport::import() {
-    // read_runtastic_files();
+    read_runtastic_files();
     read_garmin_csv();
     store_to_mongo();
 }
@@ -31,12 +31,11 @@ void UseCase::SessionImport::import() {
 void UseCase::SessionImport::read_garmin_csv() {
   std::string line;
   std::vector<std::string> strs;
+  int cnt = 0;
 
   std::ifstream filestream("data/garmin_activities.csv");
 
   while (getline (filestream, line)) {
-    std::cout << line << std::endl;
-
     boost::split(strs, line, boost::is_any_of(","));
 
     std::vector<std::string> strings;
@@ -62,12 +61,12 @@ void UseCase::SessionImport::read_garmin_csv() {
       rs.end_time       = rs.start_time + rs.duration / 1000;
       rs.notes          = strings[3]; 
 
-      rs.print();
+      cnt++;
 
       this->data.push_back(rs);
     }
-    std::cout << std::endl;
   }
+  std::cout << "Found: " << cnt << " entries" << std::endl;
 
   filestream.close();  
 }

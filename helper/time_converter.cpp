@@ -88,7 +88,6 @@ int Helper::TimeConverter::weekday_to_idx(std::string name) {
 int Helper::TimeConverter::time_str_to_ms(std::string time) {
   std::vector<std::string> strs;
   
-  std::cout << time << std::endl;
   boost::split(strs, time, boost::is_any_of(":"));
 
   int ms = 0;
