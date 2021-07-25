@@ -39,7 +39,7 @@ std::string Helper::TimeConverter::secs_to_min_str( uint32_t secs ) {
   std::stringstream ss;
 
   if(secs > 3600) {
-    ss << secs / 3600 << ":";
+    ss << std::setw(2) << std::setfill('0') << secs / 3600 << ":";
     secs %= 3600;
   }
   ss << std::setw(2) << std::setfill('0') << secs / 60 << ":"

@@ -46,6 +46,7 @@ bsoncxx::builder::basic::array Statistics::vector_to_array(std::vector<T> vec) {
 void Statistics::aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
 
   aggregate_basic_statistics(years, sport_type_ids, grouping);
+  aggregate_years(years, sport_type_ids);
   aggregate_weekdays(years, sport_type_ids);
   aggregate_hour_of_day(years, sport_type_ids);
 }
@@ -112,8 +113,45 @@ void Statistics::aggregate_basic_statistics(std::vector<int> years, std::vector<
   Output::print_track_based_stats(cursor, grouping); 
 }
 
+
+void Statistics::aggregate_years(std::vector<int> years, std::vector<int> sport_type_ids) {
+  using namespace bsoncxx::builder::basic;
+  mongocxx::pipeline p{};
+
+  auto matcher = bsoncxx::builder::stream::document {};
+  sport_type_matcher(matcher, sport_type_ids);
+  year_matcher(matcher, years);
+
+  p.match(matcher.view());
+  p.group(make_document(kvp("_id", "$year"), 
+                        kvp("overall_distance", make_document(kvp("$sum", "$distance"))),
+                        kvp("overall_duration", make_document(kvp("$sum", "$duration"))),
+                        kvp("overall_elevation_gain", make_document(kvp("$sum", "$elevation_gain"))),
+                        kvp("overall_count", make_document(kvp("$sum", 1)))
+          ));
+  p.sort(make_document(kvp("_id", 1)));
+
+  MongoDB* mc = MongoDB::connection();
+  auto cursor = mc->collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+
+  std::vector<std::string> attrs = std::vector { 
+    std::string("overall_distance"), 
+    std::string("overall_duration"),
+    std::string("overall_elevation_gain")
+  };
+  auto vecs = build_vectors(cursor, attrs);
+
+  Output::print_vector("Distance per year", vecs.at(0), &Output::meters_to_km);
+  Output::print_vector("Duration per year", vecs.at(1), &Helper::TimeConverter::ms_to_min_str);
+  Output::print_vector("Elevation gain per year", vecs.at(2));
+}
+
 bool Statistics::weekday_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
   return (Helper::TimeConverter::weekday_to_idx(a.first) < Helper::TimeConverter::weekday_to_idx(b.first)); 
+}
+
+bool Statistics::year_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
+  return (std::stoi(a.first) < std::stoi(b.first)); 
 }
 
 std::vector<std::pair<std::string, int>> Statistics::build_day_vector(mongocxx::v_noabi::cursor& cursor) {
@@ -128,6 +166,23 @@ std::vector<std::pair<std::string, int>> Statistics::build_day_vector(mongocxx::
   std::sort(dayvec.begin(), dayvec.end(), weekday_sort);
  
   return dayvec;
+}
+
+std::vector<std::vector<std::pair<std::string, int>>> Statistics::build_vectors(mongocxx::v_noabi::cursor& cursor, std::vector<std::string> attrs) {
+  std::vector<std::vector<std::pair<std::string, int>>> vecs (attrs.size());
+  
+  for(auto doc : cursor) {
+
+    for(uint32_t i = 0; i < attrs.size(); i++) {
+
+      int val = doc[attrs[i]].get_int32().value;
+
+      std::string name = std::to_string(doc["_id"].get_int32().value);
+      vecs.at(i).push_back(std::make_pair(name, val));
+    }
+  }
+ 
+  return vecs;
 }
 
 /*
