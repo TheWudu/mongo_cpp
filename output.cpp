@@ -33,25 +33,23 @@ void Output::print_session_list(std::vector<Models::Session> sessions) {
 }
 
 void Output::print_vector(std::string title, std::vector<std::pair<std::string, int>> vec, std::string(*conv)(uint32_t)) {
-  int min_val = 0;
-  int max_val = 0;
-    
+  int min_val = vec.at(0).second;
+  int max_val = vec.at(0).second;
+  size_t max_size = 0;
+
   for(const auto& [name, value] : vec) {
-    if(value > max_val) { max_val = value; }
-    if(value < min_val || min_val == 0) { min_val = value; }
+    min_val = std::min(value, min_val); 
+    max_val = std::max(value, max_val);
+    
+    max_size = std::max(max_size, conv(value).length());
   }
   int range = max_val - min_val + 10;
   int steps = range / 100 + 1;
 
   std::cout << title << ":" << std::endl << std::endl;
   
-  size_t max_size = 0;
   for(const auto& [name, value] : vec) {
-    max_size = std::max(max_size, conv(value).length());
-  }
-
-  for(const auto& [name, value] : vec) {
-    int stars = (value - min_val) / steps + 5;
+    int stars = value / steps + 1;
 
     std::cout << std::setfill(' ') 
       << std::setw(10) << name
@@ -78,13 +76,13 @@ void Output::print_track_based_stats(mongocxx::v_noabi::cursor& cursor, std::vec
     }
 
     std::string id = ss.str();
-    int32_t overall_distance = doc["overall_distance"].get_int32().value;
-    int32_t overall_duration = doc["overall_duration"].get_int32().value;
+    int32_t overall_distance       = doc["overall_distance"].get_int32().value;
+    int32_t overall_duration       = doc["overall_duration"].get_int32().value;
     int32_t overall_elevation_gain = doc["overall_elevation_gain"].get_int32().value;
     int32_t overall_elevation_loss = doc["overall_elevation_loss"].get_int32().value;
-    int32_t overall_count    = doc["overall_count"].get_int32().value;
-    double average_distance  = doc["average_distance"].get_double().value;
-    double average_pace      = doc["average_pace"].get_double().value;
+    int32_t overall_count          = doc["overall_count"].get_int32().value;
+    double average_distance        = doc["average_distance"].get_double().value;
+    double average_pace            = doc["average_pace"].get_double().value;
 
     std::cout << id << " (#" << overall_count << ")" << std::endl
       << "  overall_distance:       " << std::setw(10) << overall_distance / 1000 << " [km], overall_duration:       " << Helper::TimeConverter::ms_to_min_str(overall_duration) << std::endl

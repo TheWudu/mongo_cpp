@@ -34,15 +34,6 @@ using bsoncxx::builder::stream::open_document;
 
 #include "statistics.hpp"
 
-template <class T>
-bsoncxx::builder::basic::array Statistics::vector_to_array(std::vector<T> vec) {
-  bsoncxx::builder::basic::array a = bsoncxx::builder::basic::array();
-  for(auto v : vec) {
-    a.append(v);
-  }
-  return a;
-}
-
 void Statistics::aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
 
   aggregate_basic_statistics(years, sport_type_ids, grouping);
@@ -51,21 +42,6 @@ void Statistics::aggregate_stats(std::vector<int> years, std::vector<int> sport_
   aggregate_hour_of_day(years, sport_type_ids);
 }
 
-void Statistics::sport_type_matcher(bsoncxx::builder::stream::document& matcher, std::vector<int> sport_type_ids) {
-  using namespace bsoncxx::builder::basic;
-  if(sport_type_ids.size() > 0) {
-    matcher << "sport_type_id" << open_document <<
-      "$in" << vector_to_array(sport_type_ids) << close_document;
-  }
-}
-  
-void Statistics::year_matcher(bsoncxx::builder::stream::document& matcher, std::vector<int> years) {
-  if(years.size() > 0) {
-    matcher << "year" << open_document <<
-      "$in" << vector_to_array(years) << close_document;
-  }
-}
- 
 /* 
   db.sessions.aggregate([ 
     { $match: { "sport_type_id": { $in: [1,3,4,19] }, "start_time": { $gt: ISODate("2021-04-01"), $lt: ISODate("2022-01-01") } } }, 
@@ -78,8 +54,8 @@ void Statistics::aggregate_basic_statistics(std::vector<int> years, std::vector<
 
   mongocxx::pipeline p{};
   auto matcher = bsoncxx::builder::stream::document {};
-  sport_type_matcher(matcher, sport_type_ids);
-  year_matcher(matcher, years);
+  MongoDB::sport_type_matcher(matcher, sport_type_ids);
+  MongoDB::year_matcher(matcher, years);
 
   auto group_by = bsoncxx::builder::stream::document {};
   auto sorter   = bsoncxx::builder::stream::document {};
@@ -119,8 +95,8 @@ void Statistics::aggregate_years(std::vector<int> years, std::vector<int> sport_
   mongocxx::pipeline p{};
 
   auto matcher = bsoncxx::builder::stream::document {};
-  sport_type_matcher(matcher, sport_type_ids);
-  year_matcher(matcher, years);
+  MongoDB::sport_type_matcher(matcher, sport_type_ids);
+  MongoDB::year_matcher(matcher, years);
 
   p.match(matcher.view());
   p.group(make_document(kvp("_id", "$year"), 
@@ -197,8 +173,8 @@ void Statistics::aggregate_weekdays(std::vector<int> years, std::vector<int> spo
   mongocxx::pipeline p{};
 
   auto matcher = bsoncxx::builder::stream::document {};
-  sport_type_matcher(matcher, sport_type_ids);
-  year_matcher(matcher, years);
+  MongoDB::sport_type_matcher(matcher, sport_type_ids);
+  MongoDB::year_matcher(matcher, years);
 
   p.match(matcher.view());
   p.add_fields(make_document(kvp("weekday", make_document(kvp("$dayOfWeek", "$start_time")))));
@@ -240,8 +216,8 @@ void Statistics::aggregate_hour_of_day(std::vector<int> years, std::vector<int> 
   mongocxx::pipeline p{};
 
   auto matcher = bsoncxx::builder::stream::document {};
-  sport_type_matcher(matcher, sport_type_ids);
-  year_matcher(matcher, years);
+  MongoDB::sport_type_matcher(matcher, sport_type_ids);
+  MongoDB::year_matcher(matcher, years);
 
   p.match(matcher.view());
   p.add_fields(make_document(kvp("hour", 
