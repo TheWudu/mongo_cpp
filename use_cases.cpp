@@ -2,7 +2,8 @@
 #include <string>
 #include <boost/algorithm/string.hpp>
 
-#include "mongo_db.hpp"
+#include "./repository/mongo_db.hpp"
+#include "./repository/statistics.hpp"
 #include "helper/time_converter.hpp"
 #include "helper/sport_types.hpp"
 #include "use_case/weight_import.hpp"
@@ -112,7 +113,7 @@ int current_year() {
 }
 
 void show_statistics(std::map<std::string, std::string> const args) {
-  MongoDB* mc = MongoDB::connection();
+  Statistics statistics = Statistics();
   std::vector<int> years;
   std::vector<int> sport_type_ids;
   std::vector<std::string> grouping;
@@ -131,6 +132,7 @@ void show_statistics(std::map<std::string, std::string> const args) {
     }
   }
   catch (std::out_of_range&) {
+    std::cout << "Defaulting to current year: " << current_year() << std::endl;
     years.push_back(current_year());
   }
   
@@ -145,8 +147,9 @@ void show_statistics(std::map<std::string, std::string> const args) {
     }
   }
   catch (std::out_of_range&) {
+    std::cout << "Defaulting to; running" << std::endl;
     sport_type_ids.push_back(1); // running
   }
 
-  mc->aggregate_stats(years, sport_type_ids, grouping);
+  statistics.aggregate_stats(years, sport_type_ids, grouping);
 }

@@ -3,7 +3,7 @@
 CC        := g++
 LD        := g++
 
-MODULES   := helper use_case models .
+MODULES   := helper use_case models repository .
 SRC_DIR   := $(MODULES) # $(addprefix src/,$(MODULES))
 BUILD_DIR := $(addprefix build/,$(MODULES))
 
@@ -41,6 +41,8 @@ $(BUILD_DIR):
 
 clean:
 	@rm -rf build/*
+
+rebuild: clean all
 
 $(foreach bdir,$(BUILD_DIR), $(eval $(call make-goal,$(bdir))))
 

@@ -1,7 +1,7 @@
 #include "session_show.hpp"
 
 #include "../models/session.hpp"
-#include "../mongo_db.hpp"
+#include "../repository/mongo_db.hpp"
 
 void UseCase::SessionShow::find(std::string id) {
   Models::Session rs;
