@@ -53,7 +53,9 @@ void Output::print_vector(std::string title, std::vector<std::pair<std::string, 
 
     std::cout << std::setfill(' ') 
       << std::setw(10) << name
-      << std::setw(2) << "(" << std::setw(max_size) << conv(value) << ") |"
+      << std::setw(2) << "(" << std::setw(max_size) << conv(value) 
+      // << "; " << std::fixed << std::setprecision(2) << (float)(value * 1.0 / min_val)   // factor from min_val
+      << ") |"
       << std::setw(stars) << std::setfill('*') << "\n";
   }
   std::cout << std::endl;
