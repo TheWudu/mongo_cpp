@@ -43,8 +43,7 @@ void Output::print_vector(std::string title, std::vector<std::pair<std::string, 
     
     max_size = std::max(max_size, conv(value).length());
   }
-  int range = max_val - min_val + 10;
-  int steps = range / 100 + 1;
+  int steps = max_val / 100 + 1;
 
   std::cout << title << ":" << std::endl << std::endl;
   
