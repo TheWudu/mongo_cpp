@@ -11,6 +11,7 @@
 #include "../repository/mongo_db.hpp"
 #include "../file_list.hpp"
 #include "../json_parser.hpp"
+#include "../gpx_parser.hpp"
 #include "../helper/time_converter.hpp"
 #include "../helper/sport_types.hpp"
 
@@ -23,9 +24,16 @@ bool UseCase::SessionImport::session_sort (Models::Session a, Models::Session b)
 }
 
 void UseCase::SessionImport::import() {
-    read_runtastic_files();
-    read_garmin_csv();
-    store_to_mongo();
+    read_gpx_files();
+    //read_runtastic_files();
+    //read_garmin_csv();
+    //store_to_mongo();
+}
+
+void UseCase::SessionImport::read_gpx_files() {
+  GpxParser gpx = GpxParser();
+
+  gpx.parse_file("data/activity_7192869305_trimmed.gpx");
 }
 
 void UseCase::SessionImport::read_garmin_csv() {
