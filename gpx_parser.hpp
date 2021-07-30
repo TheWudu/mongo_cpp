@@ -31,7 +31,10 @@ public:
   }
 
   void print() {
-    std::cout << this->lat << ", " << this->lng << " - " << this->elevation << " - " << Helper::TimeConverter::time_to_string(this->time) << std::endl;
+    std::cout << std::setprecision(16) << this->lat << ", " 
+              << std::setprecision(16) << this->lng << " - " 
+              << this->elevation << " - " 
+              << Helper::TimeConverter::time_to_string(this->time) << std::endl;
   }
 };
 
@@ -53,8 +56,12 @@ private:
   double lng;
   double elevation;
   time_t time;
+  std::string type;
+  std::string name; 
 
   std::vector<GpxPoint*> data;
+
+  void calculate_values();
 
   void parse_state_gpx(std::string line, std::vector<gpx_tags>& state);
   void parse_state_trk(std::string line, std::vector<gpx_tags>& state);

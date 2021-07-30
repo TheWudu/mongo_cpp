@@ -33,7 +33,7 @@ void UseCase::SessionImport::import() {
 void UseCase::SessionImport::read_gpx_files() {
   GpxParser gpx = GpxParser();
 
-  gpx.parse_file("data/activity_7192869305_trimmed.gpx");
+  gpx.parse_file("data/activity_7209614637.gpx");
 }
 
 void UseCase::SessionImport::read_garmin_csv() {
