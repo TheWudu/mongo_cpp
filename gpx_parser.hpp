@@ -52,12 +52,16 @@ public:
 
 private:
 
+  // per gpx trkpoint 
   double lat;
   double lng;
   double elevation;
   time_t time;
+  // per gpx trace (only once)
   std::string type;
   std::string name; 
+  time_t start_time;
+  time_t end_time; 
 
   std::vector<GpxPoint*> data;
 

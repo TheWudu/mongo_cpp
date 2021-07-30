@@ -153,6 +153,10 @@ void GpxParser::calculate_values() {
   double elevation_gain = 0.0;
   double elevation_loss = 0.0;
 
+  time_t start_time = data.front()->time;
+  time_t end_time   = data.back()->time;
+  uint32_t duration = (end_time - start_time) * 1000;
+
   GpxPoint* pp = (*data.begin());
   
   //for(GpxPoint* p = data.begin() + 1; p != data.end(); p++) {
@@ -168,7 +172,10 @@ void GpxParser::calculate_values() {
     pp = p;
   }
   
-  std::cout << "Elevation_gain: " << elevation_gain << std::endl
+  std::cout << "Start time:     " << Helper::TimeConverter::time_to_string(start_time) << std::endl
+            << "End time:       " << Helper::TimeConverter::time_to_string(end_time) << std::endl
+            << "Duration:       " << duration << std::endl
+            << "Elevation_gain: " << elevation_gain << std::endl
             << "Elevation_loss: " << elevation_loss << std::endl;
 
 }
