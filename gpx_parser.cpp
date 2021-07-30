@@ -34,7 +34,7 @@ void GpxParser::parse_file(std::string const filename) {
   }
 
   for(GpxPoint* gpx : this->data) {
-    std::cout << gpx->lat << ", " << gpx->lng << " - " << gpx->elevation << std::endl;
+    gpx->print();
   }
   std::cout << std::endl;
 }
@@ -67,6 +67,18 @@ void GpxParser::parse_state_trk(std::string line, std::vector<gpx_tags>& state) 
 void GpxParser::get_double_value(std::string s, std::string attr, double& val) {
   if(s.find(attr) != std::string::npos) {
     val = std::stod(s.substr(s.find("=") + 2, s.size() - s.find("=") - 3));
+  }
+}
+
+void GpxParser::get_string_in_tags(std::string s, std::string attr, std::string& val) {
+
+  std::string tag = "<" + attr + ">";
+  std::string etag = "</" + attr + ">";
+  if(s.find(tag) != std::string::npos) {
+    std::cout << s.find(tag) << " - " << attr.size() + 2 << " - " << s.size() << " - " << s.find(etag) << std::endl;
+    size_t begin = s.find(tag) + attr.size() + 2;
+    size_t len   = s.find(etag) - begin;
+    val = s.substr(begin, len);
   }
 }
 
@@ -103,9 +115,21 @@ void GpxParser::parse_state_trkpt(std::string line, std::vector<gpx_tags>& state
   
   auto pos = line.find("<ele>");
   if(pos != std::string::npos) {
-    this->elevation = std::stod(line.substr(pos + 5, line.find("</ele>")));
+    this->elevation = std::stod(line.substr(pos + 5, line.find("</ele>") - 6));
     
     std::cout << "Elevation: " << std::setprecision(5) << this->elevation << std::endl;
+  }
+  
+  pos = line.find("<time>");
+  if(pos != std::string::npos) {
+    std::string time_str;
+    std::string tag("time");
+    get_string_in_tags(line, tag, time_str);
+
+    std::cout << "Time: " << time_str << std::endl;
+    this->time = Helper::TimeConverter::date_time_string_to_time_t(time_str);
+    
+    std::cout << "Time: "  << this->time << " == " << Helper::TimeConverter::time_to_string(this->time) <<  std::endl;
   }
 
   if(line.find("</trkpt>") != std::string::npos) {
@@ -114,8 +138,9 @@ void GpxParser::parse_state_trkpt(std::string line, std::vector<gpx_tags>& state
     gpx_point->lat       = this->lat;
     gpx_point->lng       = this->lng;
     gpx_point->elevation = this->elevation;
-    std::cout << gpx_point->lat << ", " << gpx_point->lng << " - " << gpx_point->elevation << std::endl;
-   
+    gpx_point->time      = this->time;
+    gpx_point->print();
+ 
     std::cout << "data.size(): " << data.size() << std::endl; 
     
     this->data.push_back(gpx_point);

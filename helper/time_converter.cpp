@@ -12,8 +12,21 @@ std::string Helper::TimeConverter::time_to_string(const time_t time) {
 
   return std::string { buf };
 }
+ 
+std::size_t replace_all(std::string& inout, std::string_view what, std::string_view with)
+{
+    std::size_t count{};
+    for (std::string::size_type pos{};
+         inout.npos != (pos = inout.find(what.data(), pos, what.length()));
+         pos += with.length(), ++count) {
+        inout.replace(pos, what.length(), with.data(), with.length());
+    }
+    return count;
+}
 
-time_t Helper::TimeConverter::date_time_string_to_time_t(const std::string time_str) {
+time_t Helper::TimeConverter::date_time_string_to_time_t(std::string time_str) {
+  replace_all(time_str, "T", " ");
+  replace_all(time_str, "Z", "");
   boost::posix_time::ptime pt(boost::posix_time::time_from_string(time_str));
   static boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
   boost::posix_time::time_duration::sec_type secs = (pt - epoch).total_seconds();
