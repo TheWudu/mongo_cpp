@@ -38,11 +38,6 @@ void GpxParser::parse_file(std::string const filename) {
 }
 
 Models::Session GpxParser::build_model() {
-  std::cout << "Gpx data: " << std::endl;
-  std::cout << "  Type: " << this->type << "; " << this->name << std::endl;
-  this->data.front()->print();
-  this->data.back()->print();
-
   double elevation_gain = 0.0;
   double elevation_loss = 0.0;
   double distance       = 0.0;
@@ -64,18 +59,16 @@ Models::Session GpxParser::build_model() {
     }
 
     distance += Helper::Geokit::distance_earth(pp->lat, pp->lng, p->lat, p->lng);
-
-    // std::cout << elevation_gain << " += " << p->elevation << " - " << pp->elevation << std::endl;
     pp = p;
   }
   distance *= 1000.0;
   
-  std::cout << "Start time:     " << Helper::TimeConverter::time_to_string(start_time) << std::endl
-            << "End time:       " << Helper::TimeConverter::time_to_string(end_time) << std::endl
-            << "Duration:       " << Helper::TimeConverter::ms_to_min_str(duration) << std::endl
-            << "Distance:       " << (uint32_t)distance << " [m]" << std::endl
-            << "Elevation_gain: " << (uint32_t)elevation_gain << std::endl
-            << "Elevation_loss: " << (uint32_t)elevation_loss << std::endl;
+  // std::cout << "Start time:     " << Helper::TimeConverter::time_to_string(start_time) << std::endl
+  //           << "End time:       " << Helper::TimeConverter::time_to_string(end_time) << std::endl
+  //           << "Duration:       " << Helper::TimeConverter::ms_to_min_str(duration) << std::endl
+  //           << "Distance:       " << (uint32_t)distance << " [m]" << std::endl
+  //           << "Elevation_gain: " << (uint32_t)elevation_gain << std::endl
+  //           << "Elevation_loss: " << (uint32_t)elevation_loss << std::endl;
 
   
   Models::Session session;
