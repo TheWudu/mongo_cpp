@@ -62,10 +62,16 @@ private:
   // per gpx trace (only once)
   std::string type;
   std::string name; 
+  double distance;
+  double elevation_gain;
+  double elevation_loss;
+  time_t start_time;
+  time_t end_time;
+  uint32_t duration;
 
   std::vector<GpxPoint*> data;
 
-  void calculate_values();
+  void calculate_stats();
 
   void parse_state_gpx(std::string line, std::vector<gpx_tags>& state);
   void parse_state_trk(std::string line, std::vector<gpx_tags>& state);

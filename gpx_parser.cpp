@@ -19,8 +19,6 @@ void GpxParser::parse_file(std::string const filename) {
   this->data.clear();
 
   while (getline (filestream, line)) {
-    // std::cout << line << std::endl;
-
     if(state.size() != 0) {
       switch(state.back()) {
         case(gpx):    parse_state_gpx(line, state);    break;
@@ -37,7 +35,7 @@ void GpxParser::parse_file(std::string const filename) {
   }
 }
 
-Models::Session* GpxParser::build_model() {
+void GpxParser::calculate_stats() {
   double elevation_gain = 0.0;
   double elevation_loss = 0.0;
   double distance       = 0.0;
@@ -48,7 +46,6 @@ Models::Session* GpxParser::build_model() {
 
   GpxPoint* pp = (*data.begin());
   
-  //for(GpxPoint* p = data.begin() + 1; p != data.end(); p++) {
   for(GpxPoint* p : data) {
     double diff = (p->elevation - pp->elevation);
     if(diff >= 0.0) {
@@ -62,6 +59,13 @@ Models::Session* GpxParser::build_model() {
     pp = p;
   }
   distance *= 1000.0;
+
+  this->distance = distance;
+  this->elevation_gain = elevation_gain;
+  this->elevation_loss = elevation_loss;
+  this->start_time = start_time;
+  this->end_time = end_time;
+  this->duration = duration;
   
   // std::cout << "Start time:     " << Helper::TimeConverter::time_to_string(start_time) << std::endl
   //           << "End time:       " << Helper::TimeConverter::time_to_string(end_time) << std::endl
@@ -69,19 +73,20 @@ Models::Session* GpxParser::build_model() {
   //           << "Distance:       " << (uint32_t)distance << " [m]" << std::endl
   //           << "Elevation_gain: " << (uint32_t)elevation_gain << std::endl
   //           << "Elevation_loss: " << (uint32_t)elevation_loss << std::endl;
-
+}
   
+Models::Session* GpxParser::build_model() {
   Models::Session* session = new Models::Session;
 
   session->id             = MongoDB::new_object_id();
   session->sport_type_id  = Helper::SportType::id(this->type); 
-  session->distance       = (uint32_t)(distance);
-  session->duration       = duration;
-  session->elevation_gain = elevation_gain;
-  session->elevation_loss = elevation_loss;
+  session->distance       = (uint32_t)(this->distance);
+  session->duration       = this->duration;
+  session->elevation_gain = this->elevation_gain;
+  session->elevation_loss = this->elevation_loss;
   session->start_time_timezone_offset = 7200;
-  session->start_time     = start_time;
-  session->end_time       = end_time;
+  session->start_time     = this->start_time;
+  session->end_time       = this->end_time;
   session->notes          = this->name; 
 
   return session;
