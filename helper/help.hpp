@@ -12,6 +12,7 @@ void show_help() {
     << "  session_import, import sessions from data/Sport-sessions" << std::endl
     << "  weight_import,  import weights from data/Weight" << std::endl
     << "  show,           shows a single session" << std::endl
+    << "  delete,         delete a single session" << std::endl
     << "  stats,          prints statistics" << std::endl
     << std::endl;
 }
@@ -56,6 +57,13 @@ void show_help_show() {
             << std::endl;
 }
 
+void show_help_delete() {
+  std::cout << "Delete session, deletes a single session by id. \n"
+            << "Possible parameters are: \n"
+            << "  -id=UID       e.g. 123-127382-12ab-123    no default\n"
+            << std::endl;
+}
+
 void show_help_stats() {
   std::cout << "Show some statistics like overall distance, duration, count, \n"
             << "and others. \n"
@@ -75,6 +83,7 @@ void show_help(std::string const command) {
     case session_import: show_help_session_import(); break;
     case weight_import:  show_help_weight_import();  break;
     case show:           show_help_show(); break;
+    case del:            show_help_delete(); break;
     case stats:          show_help_stats(); break;
     default:             std::cout << "No additional help available" << std::endl;
   }
