@@ -11,16 +11,15 @@ exported recently and had that data in my hands when starting this.
 
 * Import weights from runtastic export into mongodb (files have to be placed at "data/Weights")
 * Import sport-sessions from runtastic export into mongodb (at "data/Sport-sessions")
+* Import sessions from garmin csv export (constraint: language: en, number format: 1,234.56)
+* Import sessions from gpx files (at "data/gpx")
 * Find/Read those documents and convert to models
-* Check for existance of those documents
-* Simple aggregation to calculate some statistics
+* Check for existance of documents
+* Aggregations to calculate some statistics
 * Simple menu for selecting some actions
 * List sessions, filter by from and to date, default to 30 days ago and now.
 * Allow command line usage (ls, show, stats..)
-
-Some more things I will provide most likely:
-
-* Refactoring, cleanup
+* Delete a single session
 
 ## TODO
 
