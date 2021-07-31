@@ -24,16 +24,26 @@ bool UseCase::SessionImport::session_sort (Models::Session a, Models::Session b)
 }
 
 void UseCase::SessionImport::import() {
+    read_runtastic_files();
+    read_garmin_csv();
     read_gpx_files();
-    //read_runtastic_files();
-    //read_garmin_csv();
-    //store_to_mongo();
+    store_to_mongo();
 }
 
 void UseCase::SessionImport::read_gpx_files() {
-  GpxParser gpx = GpxParser();
+  FileList file_list = FileList("data/gpx");
 
-  gpx.parse_file("data/activity_7209614637.gpx");
+  std::vector<std::string> files = file_list.files();
+
+  std::cout << "Found: " << files.size() << " GPX files" << std::endl;
+
+  for(auto filename = files.begin(); filename != files.end(); filename++) {
+    GpxParser gpx = GpxParser();
+
+    gpx.parse_file(*filename);
+    Models::Session session = gpx.build_model();
+    this->data.push_back(session); 
+  }
 }
 
 void UseCase::SessionImport::read_garmin_csv() {
@@ -74,7 +84,7 @@ void UseCase::SessionImport::read_garmin_csv() {
       this->data.push_back(rs);
     }
   }
-  std::cout << "Found: " << cnt << " entries" << std::endl;
+  std::cout << "Found: " << cnt << " GARMIN csv entries" << std::endl;
 
   filestream.close();  
 }
@@ -84,7 +94,7 @@ void UseCase::SessionImport::read_runtastic_files() {
 
   std::vector<std::string> files = file_list.files();
 
-  std::cout << "Found: " << files.size() << " files" << std::endl;
+  std::cout << "Found: " << files.size() << " RUNTASTIC JSON files" << std::endl;
 
   for(auto filename = files.begin(); filename != files.end(); filename++) {
     JsonParser json_parser = JsonParser(*filename);

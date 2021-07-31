@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "helper/time_converter.hpp"
+#include "models/session.hpp"
 
 
 enum gpx_tags {
@@ -43,6 +44,7 @@ class GpxParser {
 public:
 
   void parse_file(std::string filename);
+  Models::Session build_model();
 
   ~GpxParser () {
     for(auto gpx_point : data) {
@@ -60,8 +62,6 @@ private:
   // per gpx trace (only once)
   std::string type;
   std::string name; 
-  time_t start_time;
-  time_t end_time; 
 
   std::vector<GpxPoint*> data;
 

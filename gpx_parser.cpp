@@ -4,6 +4,11 @@
 #include <fstream>
 #include <boost/algorithm/string.hpp>
 
+#include "helper/geokit.hpp"
+#include "helper/sport_types.hpp"
+#include "../models/session.hpp"
+#include "repository/mongo_db.hpp"
+
 #include "gpx_parser.hpp"
 
 void GpxParser::parse_file(std::string const filename) {
@@ -11,9 +16,7 @@ void GpxParser::parse_file(std::string const filename) {
   std::ifstream filestream(filename);
   std::vector<gpx_tags> state;
 
- 
   this->data.clear();
-  std::cout << "GpxFile: " << filename << std::endl;
 
   while (getline (filestream, line)) {
     // std::cout << line << std::endl;
@@ -32,16 +35,63 @@ void GpxParser::parse_file(std::string const filename) {
       state.push_back(gpx);
     }
   }
+}
 
+Models::Session GpxParser::build_model() {
   std::cout << "Gpx data: " << std::endl;
   std::cout << "  Type: " << this->type << "; " << this->name << std::endl;
   this->data.front()->print();
   this->data.back()->print();
-  calculate_values();
-  //for(GpxPoint* gpx : this->data) {
-  //  gpx->print();
-  //}
-  std::cout << std::endl;
+
+  double elevation_gain = 0.0;
+  double elevation_loss = 0.0;
+  double distance       = 0.0;
+
+  time_t start_time = data.front()->time;
+  time_t end_time   = data.back()->time;
+  uint32_t duration = (end_time - start_time) * 1000;
+
+  GpxPoint* pp = (*data.begin());
+  
+  //for(GpxPoint* p = data.begin() + 1; p != data.end(); p++) {
+  for(GpxPoint* p : data) {
+    double diff = (p->elevation - pp->elevation);
+    if(diff >= 0.0) {
+      elevation_gain += diff;
+    }
+    else {
+      elevation_loss += std::abs(diff);
+    }
+
+    distance += Helper::Geokit::distance_earth(pp->lat, pp->lng, p->lat, p->lng);
+
+    // std::cout << elevation_gain << " += " << p->elevation << " - " << pp->elevation << std::endl;
+    pp = p;
+  }
+  distance *= 1000.0;
+  
+  std::cout << "Start time:     " << Helper::TimeConverter::time_to_string(start_time) << std::endl
+            << "End time:       " << Helper::TimeConverter::time_to_string(end_time) << std::endl
+            << "Duration:       " << Helper::TimeConverter::ms_to_min_str(duration) << std::endl
+            << "Distance:       " << (uint32_t)distance << " [m]" << std::endl
+            << "Elevation_gain: " << (uint32_t)elevation_gain << std::endl
+            << "Elevation_loss: " << (uint32_t)elevation_loss << std::endl;
+
+  
+  Models::Session session;
+
+  session.id             = MongoDB::new_object_id();
+  session.sport_type_id  = Helper::SportType::id(this->type); 
+  session.distance       = (uint32_t)(distance);
+  session.duration       = duration;
+  session.elevation_gain = elevation_gain;
+  session.elevation_loss = elevation_loss;
+  session.start_time_timezone_offset = 7200;
+  session.start_time     = start_time;
+  session.end_time       = end_time;
+  session.notes          = this->name; 
+
+  return session;
 }
 
 void GpxParser::parse_state_gpx(std::string line, std::vector<gpx_tags>& state) {
@@ -149,33 +199,3 @@ void GpxParser::parse_state_trkpt(std::string line, std::vector<gpx_tags>& state
   }
 }
 
-void GpxParser::calculate_values() {
-  double elevation_gain = 0.0;
-  double elevation_loss = 0.0;
-
-  time_t start_time = data.front()->time;
-  time_t end_time   = data.back()->time;
-  uint32_t duration = (end_time - start_time) * 1000;
-
-  GpxPoint* pp = (*data.begin());
-  
-  //for(GpxPoint* p = data.begin() + 1; p != data.end(); p++) {
-  for(GpxPoint* p : data) {
-    double diff = (p->elevation - pp->elevation);
-    if(diff >= 0.0) {
-      elevation_gain += diff;
-    }
-    else {
-      elevation_loss += std::abs(diff);
-    }
-    // std::cout << elevation_gain << " += " << p->elevation << " - " << pp->elevation << std::endl;
-    pp = p;
-  }
-  
-  std::cout << "Start time:     " << Helper::TimeConverter::time_to_string(start_time) << std::endl
-            << "End time:       " << Helper::TimeConverter::time_to_string(end_time) << std::endl
-            << "Duration:       " << duration << std::endl
-            << "Elevation_gain: " << elevation_gain << std::endl
-            << "Elevation_loss: " << elevation_loss << std::endl;
-
-}
