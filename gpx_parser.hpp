@@ -44,7 +44,7 @@ class GpxParser {
 public:
 
   void parse_file(std::string filename);
-  Models::Session build_model();
+  Models::Session* build_model();
 
   ~GpxParser () {
     for(auto gpx_point : data) {

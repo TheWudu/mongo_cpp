@@ -8,6 +8,12 @@ namespace UseCase {
   public:
     void import();
 
+    ~SessionImport() {
+      for(auto rs : data) {
+        delete rs;
+      }
+    }
+
   private:
 
     void import_runtastic();
@@ -18,8 +24,8 @@ namespace UseCase {
     void read_garmin_csv();
     void store_to_mongo();
 
-    static bool session_sort (Models::Session a, Models::Session b);
+    static bool session_sort (Models::Session* a, Models::Session* b);
 
-    std::vector<Models::Session> data;
+    std::vector<Models::Session*> data;
   };
 }

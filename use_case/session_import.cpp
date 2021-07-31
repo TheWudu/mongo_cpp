@@ -19,8 +19,8 @@
 
 using json = nlohmann::json;
 
-bool UseCase::SessionImport::session_sort (Models::Session a, Models::Session b) { 
-  return (a.start_time < b.start_time); 
+bool UseCase::SessionImport::session_sort (Models::Session* a, Models::Session* b) { 
+  return (a->start_time < b->start_time); 
 }
 
 void UseCase::SessionImport::import() {
@@ -41,7 +41,7 @@ void UseCase::SessionImport::read_gpx_files() {
     GpxParser gpx = GpxParser();
 
     gpx.parse_file(*filename);
-    Models::Session session = gpx.build_model();
+    Models::Session* session = gpx.build_model();
     this->data.push_back(session); 
   }
 }
@@ -67,17 +67,17 @@ void UseCase::SessionImport::read_garmin_csv() {
       std::string dist = strings[4];
       dist.erase(remove(dist.begin(), dist.end(), '"'), dist.end());
 
-      Models::Session rs;
-      rs.id             = MongoDB::new_object_id();
-      rs.sport_type_id  = Helper::SportType::id(strings[0]); 
-      rs.distance       = std::stof(dist) * 1000;
-      rs.duration       = Helper::TimeConverter::time_str_to_ms(strings[6]);
-      rs.elevation_gain = strings[14] == "--" ? 0 : std::stoi(strings[14]);
-      rs.elevation_loss = strings[15] == "--" ? 0 : std::stoi(strings[15]);
-      rs.start_time_timezone_offset = 7200;
-      rs.start_time     = Helper::TimeConverter::date_time_string_to_time_t(strings[1]) - rs.start_time_timezone_offset;
-      rs.end_time       = rs.start_time + rs.duration / 1000;
-      rs.notes          = strings[3]; 
+      Models::Session* rs = new Models::Session;
+      rs->id             = MongoDB::new_object_id();
+      rs->sport_type_id  = Helper::SportType::id(strings[0]); 
+      rs->distance       = std::stof(dist) * 1000;
+      rs->duration       = Helper::TimeConverter::time_str_to_ms(strings[6]);
+      rs->elevation_gain = strings[14] == "--" ? 0 : std::stoi(strings[14]);
+      rs->elevation_loss = strings[15] == "--" ? 0 : std::stoi(strings[15]);
+      rs->start_time_timezone_offset = 7200;
+      rs->start_time     = Helper::TimeConverter::date_time_string_to_time_t(strings[1]) - rs->start_time_timezone_offset;
+      rs->end_time       = rs->start_time + rs->duration / 1000;
+      rs->notes          = strings[3]; 
 
       cnt++;
 
@@ -101,22 +101,22 @@ void UseCase::SessionImport::read_runtastic_files() {
   
     json json_data = json_parser.get_data();
 
-    Models::Session rs;
-    rs.id          = json_data["id"];
-    rs.distance    = json_data["distance"];
-    rs.duration    = json_data["duration"];
+    Models::Session* rs = new Models::Session;
+    rs->id          = json_data["id"];
+    rs->distance    = json_data["distance"];
+    rs->duration    = json_data["duration"];
     if(json_data["elevation_gain"] != nullptr) {
-      rs.elevation_gain = json_data["elevation_gain"];
-      rs.elevation_loss = json_data["elevation_loss"];
+      rs->elevation_gain = json_data["elevation_gain"];
+      rs->elevation_loss = json_data["elevation_loss"];
     }
     int64_t start_timestamp       = json_data["start_time"];
     int64_t end_timestamp         = json_data["end_time"];
-    rs.start_time_timezone_offset = json_data["start_time_timezone_offset"];
-    rs.start_time    = start_timestamp / 1000;
-    rs.end_time      = end_timestamp / 1000;
-    rs.sport_type_id = std::stoi((std::string)json_data["sport_type_id"]);
+    rs->start_time_timezone_offset = json_data["start_time_timezone_offset"];
+    rs->start_time    = start_timestamp / 1000;
+    rs->end_time      = end_timestamp / 1000;
+    rs->sport_type_id = std::stoi((std::string)json_data["sport_type_id"]);
     if(json_data["notes"] != nullptr) {
-      rs.notes         = json_data["notes"];
+      rs->notes         = json_data["notes"];
     }
 
     this->data.push_back(rs);
@@ -131,7 +131,8 @@ void UseCase::SessionImport::store_to_mongo() {
   int icnt = 0;
   int fcnt = 0;
 
-  for(auto rs = this->data.begin(); rs != this->data.end(); rs++) {
+  // for(auto rs = this->data.begin(); rs != this->data.end(); rs++) {
+  for(auto rs : data) {
     if (mc->exists(rs->start_time, rs->sport_type_id) == false) {
        mc->insert(*rs);
       icnt++;

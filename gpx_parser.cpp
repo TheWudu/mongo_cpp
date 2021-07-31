@@ -37,7 +37,7 @@ void GpxParser::parse_file(std::string const filename) {
   }
 }
 
-Models::Session GpxParser::build_model() {
+Models::Session* GpxParser::build_model() {
   double elevation_gain = 0.0;
   double elevation_loss = 0.0;
   double distance       = 0.0;
@@ -71,18 +71,18 @@ Models::Session GpxParser::build_model() {
   //           << "Elevation_loss: " << (uint32_t)elevation_loss << std::endl;
 
   
-  Models::Session session;
+  Models::Session* session = new Models::Session;
 
-  session.id             = MongoDB::new_object_id();
-  session.sport_type_id  = Helper::SportType::id(this->type); 
-  session.distance       = (uint32_t)(distance);
-  session.duration       = duration;
-  session.elevation_gain = elevation_gain;
-  session.elevation_loss = elevation_loss;
-  session.start_time_timezone_offset = 7200;
-  session.start_time     = start_time;
-  session.end_time       = end_time;
-  session.notes          = this->name; 
+  session->id             = MongoDB::new_object_id();
+  session->sport_type_id  = Helper::SportType::id(this->type); 
+  session->distance       = (uint32_t)(distance);
+  session->duration       = duration;
+  session->elevation_gain = elevation_gain;
+  session->elevation_loss = elevation_loss;
+  session->start_time_timezone_offset = 7200;
+  session->start_time     = start_time;
+  session->end_time       = end_time;
+  session->notes          = this->name; 
 
   return session;
 }
