@@ -20,6 +20,7 @@ exported recently and had that data in my hands when starting this.
 * List sessions, filter by from and to date, default to 30 days ago and now.
 * Allow command line usage (ls, show, stats..)
 * Delete a single session
+* Usage output (`./run help` and `./run help <cmd>`)
 
 ## TODO
 
