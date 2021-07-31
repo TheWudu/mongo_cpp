@@ -22,9 +22,11 @@ exported recently and had that data in my hands when starting this.
 * Delete a single session
 * Usage output (`./run help` and `./run help <cmd>`)
 
-## TODO
+## Next ideas
 
-* Any ideas?
+* Edit sessions
+* Delete many (with e.g. start/end-time range)
+
 
 ## Setup
 
