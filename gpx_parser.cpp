@@ -43,6 +43,7 @@ void GpxParser::calculate_stats() {
   time_t start_time = data.front()->time;
   time_t end_time   = data.back()->time;
   uint32_t duration = (end_time - start_time) * 1000;
+  uint32_t pause    = 0;
 
   GpxPoint* pp = (*data.begin());
   
@@ -55,17 +56,25 @@ void GpxParser::calculate_stats() {
       elevation_loss += std::abs(diff);
     }
 
+    auto dur_diff = p->time - pp->time;
+    if(dur_diff >= 20) {
+      std::cout << "Diff: " << dur_diff << std::endl;
+      pause += dur_diff;
+    }
+
     distance += Helper::Geokit::distance_earth(pp->lat, pp->lng, p->lat, p->lng);
     pp = p;
   }
   distance *= 1000.0;
+
+  std::cout << "Detected pause: " << pause << " [s]" << std::endl;
 
   this->distance = distance;
   this->elevation_gain = elevation_gain;
   this->elevation_loss = elevation_loss;
   this->start_time = start_time;
   this->end_time = end_time;
-  this->duration = duration;
+  this->duration = duration - pause * 1000;
   
   // std::cout << "Start time:     " << Helper::TimeConverter::time_to_string(start_time) << std::endl
   //           << "End time:       " << Helper::TimeConverter::time_to_string(end_time) << std::endl
@@ -76,6 +85,8 @@ void GpxParser::calculate_stats() {
 }
   
 Models::Session* GpxParser::build_model() {
+  calculate_stats();
+
   Models::Session* session = new Models::Session;
 
   session->id             = MongoDB::new_object_id();
@@ -88,6 +99,8 @@ Models::Session* GpxParser::build_model() {
   session->start_time     = this->start_time;
   session->end_time       = this->end_time;
   session->notes          = this->name; 
+
+  // session->print();
 
   return session;
 }
