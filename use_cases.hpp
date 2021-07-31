@@ -12,4 +12,6 @@ void list_sessions(std::map<std::string, std::string> args);
 
 void show_session(std::map<std::string, std::string> args);
 
+void delete_sessions(std::map<std::string, std::string> args);
+
 void show_statistics(std::map<std::string, std::string> args);

@@ -62,6 +62,8 @@ public:
   bool exists(std::string colname, std::string id);
   bool exists(time_t start_time, int sport_type_id); 
 
+  bool delete_one(std::string id);
+
   void print_collection(std::string name);
 };
 

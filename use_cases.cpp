@@ -22,6 +22,28 @@ void import_sessions() {
   rs_import.import();
 }
 
+void delete_sessions(std::map<std::string, std::string> const args) {
+  MongoDB* mc = MongoDB::connection();
+  std::string id;
+
+  try {
+    id = args.at("-id");
+  
+    std::cout << "Deleting id " << id << " ...";
+  
+    if(mc->delete_one(id)) {
+      std::cout << " [DONE]" << std::endl;
+    }
+    else {
+      std::cout << " [FAILED]" << std::endl;
+    }
+  }
+  catch (std::out_of_range&) {
+    std::cout << " missing -id=<some-id> parameter" << std::endl;
+  }
+}
+
+
 void list_sessions(std::map<std::string, std::string> const args) {
   MongoDB* mc = MongoDB::connection();
   time_t from; 

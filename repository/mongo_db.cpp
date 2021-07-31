@@ -249,3 +249,18 @@ void MongoDB::year_matcher(bsoncxx::builder::stream::document& matcher, std::vec
   }
 }
  
+bool MongoDB::delete_one(std::string id) {
+  bsoncxx::document::value query = document{} 
+    << "id"   << id
+    << bsoncxx::builder::stream::finalize;
+
+  auto coll = collection("sessions");
+  auto result = coll.delete_one(query.view());
+ 
+  if(!result) { 
+    return false;
+  }
+  else {
+    return (result->deleted_count() == 1);
+  }
+}

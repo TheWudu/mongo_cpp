@@ -40,6 +40,9 @@ int main(int argc, char* argv[])
       case show: 
         parse_args(argc, argv, args);
         show_session(args); break;
+      case del: 
+        parse_args(argc, argv, args);
+        delete_sessions(args); break;
       case stats:
         parse_args(argc, argv, args);
         show_statistics(args); break;
