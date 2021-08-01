@@ -72,6 +72,7 @@ void UseCase::SessionImport::read_garmin_csv() {
       rs->sport_type_id  = Helper::SportType::id(strings[0]); 
       rs->distance       = std::stof(dist) * 1000;
       rs->duration       = Helper::TimeConverter::time_str_to_ms(strings[6]);
+      rs->pause          = 0;
       rs->elevation_gain = strings[14] == "--" ? 0 : std::stoi(strings[14]);
       rs->elevation_loss = strings[15] == "--" ? 0 : std::stoi(strings[15]);
       rs->start_time_timezone_offset = 7200;
@@ -105,6 +106,9 @@ void UseCase::SessionImport::read_runtastic_files() {
     rs->id          = json_data["id"];
     rs->distance    = json_data["distance"];
     rs->duration    = json_data["duration"];
+    if(json_data["pause_duration"] != nullptr) {
+      rs->pause       = json_data["pause_duration"];
+    }
     if(json_data["elevation_gain"] != nullptr) {
       rs->elevation_gain = json_data["elevation_gain"];
       rs->elevation_loss = json_data["elevation_loss"];

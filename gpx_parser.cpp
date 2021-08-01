@@ -97,6 +97,7 @@ Models::Session* GpxParser::build_model() {
   session->start_time     = this->start_time;
   session->end_time       = this->end_time;
   session->notes          = this->name; 
+  session->pause          = this->pause;
 
   // session->print();
 

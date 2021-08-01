@@ -87,6 +87,7 @@ void MongoDB::insert(Models::Session rs) {
     << "start_time_timezone_offset" << rs.start_time_timezone_offset
     << "distance" << rs.distance
     << "duration" << rs.duration
+    << "pause" << rs.pause
     << "elevation_gain" << rs.elevation_gain
     << "elevation_loss" << rs.elevation_loss
     << "sport_type_id" << rs.sport_type_id;
@@ -183,6 +184,9 @@ void MongoDB::build_session(bsoncxx::v_noabi::document::view data, Models::Sessi
   session->end_time       =  ms / 1000;
   session->distance       = data["distance"].get_int32().value;
   session->duration       = data["duration"].get_int32().value;
+  if(data["pause"]) {
+    session->pause          = data["pause"].get_int32().value;
+  }
   session->elevation_gain = data["elevation_gain"].get_int32().value;
   session->elevation_loss = data["elevation_loss"].get_int32().value;
   if(data["notes"]) {
