@@ -17,14 +17,14 @@ void Output::print_session_list(std::vector<Models::Session> sessions) {
   for(const auto session : sessions) {
     max_size_typ = std::max(max_size_typ, Helper::SportType::name(session.sport_type_id).length()); 
     max_size_dur = std::max(max_size_dur, Helper::TimeConverter::ms_to_min_str(session.duration).length());
-    max_size_dis = std::max(max_size_dis, std::to_string(session.duration).length());
+    max_size_dis = 6; // std::max(max_size_dis, std::to_string(session.duration / 1000.0).length());
   }
 
   for(auto session: sessions) {
     cout <<       setw(38) << session.id
       << " - " << setw(17) << Helper::TimeConverter::time_to_string(session.start_time)
       << " - " << setw(max_size_typ) << left << Helper::SportType::name(session.sport_type_id)
-      << " - " << setw(max_size_dis) << right << (session.distance > 0 ? std::to_string(session.distance) : "") 
+      << " - " << setw(max_size_dis) << right << std::fixed << std::setprecision(2) << (session.distance > 0 ? session.distance / 1000.0 : 0.0) 
       << " - " << setw(max_size_dur) << right << Helper::TimeConverter::ms_to_min_str(session.duration)
       << " - " << session.notes.substr(0, notes_len) << (session.notes.size() > notes_len ? "..." : "")
       << endl;

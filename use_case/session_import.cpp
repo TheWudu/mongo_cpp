@@ -75,8 +75,9 @@ void UseCase::SessionImport::read_garmin_csv() {
       rs->pause          = 0;
       rs->elevation_gain = strings[14] == "--" ? 0 : std::stoi(strings[14]);
       rs->elevation_loss = strings[15] == "--" ? 0 : std::stoi(strings[15]);
-      rs->start_time_timezone_offset = 7200;
-      rs->start_time     = Helper::TimeConverter::date_time_string_to_time_t(strings[1]) - rs->start_time_timezone_offset;
+      rs->start_time     = Helper::TimeConverter::date_time_string_to_time_t(strings[1]);
+      rs->start_time_timezone_offset = Helper::TimeConverter::local_timezone_offset(rs->start_time);
+      rs->start_time    -= rs->start_time_timezone_offset;
       rs->end_time       = rs->start_time + rs->duration / 1000;
       rs->notes          = strings[3]; 
 
