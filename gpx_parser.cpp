@@ -58,7 +58,6 @@ void GpxParser::calculate_stats() {
 
     auto dur_diff = p->time - pp->time;
     if(dur_diff >= 20) {
-      std::cout << "Diff: " << dur_diff << std::endl;
       pause += dur_diff;
     }
 
@@ -67,14 +66,13 @@ void GpxParser::calculate_stats() {
   }
   distance *= 1000.0;
 
-  std::cout << "Detected pause: " << pause << " [s]" << std::endl;
-
   this->distance = distance;
   this->elevation_gain = elevation_gain;
   this->elevation_loss = elevation_loss;
   this->start_time = start_time;
   this->end_time = end_time;
   this->duration = duration - pause * 1000;
+  this->pause    = pause;
   
   // std::cout << "Start time:     " << Helper::TimeConverter::time_to_string(start_time) << std::endl
   //           << "End time:       " << Helper::TimeConverter::time_to_string(end_time) << std::endl
@@ -95,7 +93,7 @@ Models::Session* GpxParser::build_model() {
   session->duration       = this->duration;
   session->elevation_gain = this->elevation_gain;
   session->elevation_loss = this->elevation_loss;
-  session->start_time_timezone_offset = 7200;
+  session->start_time_timezone_offset = Helper::TimeConverter::local_timezone_offset(this->start_time);
   session->start_time     = this->start_time;
   session->end_time       = this->end_time;
   session->notes          = this->name; 

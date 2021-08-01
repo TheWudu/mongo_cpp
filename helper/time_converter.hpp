@@ -8,6 +8,7 @@ namespace Helper {
 
   public:
 
+    static int32_t local_timezone_offset(const time_t time);
     static std::string time_to_string(const time_t time);
     static time_t date_time_string_to_time_t(const std::string time_str);
     static time_t string_to_time_t(const std::string);

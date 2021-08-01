@@ -5,10 +5,18 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string.hpp>
 
+int32_t Helper::TimeConverter::local_timezone_offset(const time_t time) {
+  std::string local_time_str = Helper::TimeConverter::time_to_string(time);
+  time_t local_time = Helper::TimeConverter::date_time_string_to_time_t(local_time_str);
+  int32_t offset = local_time - time;
+
+  return offset;
+}
+
 std::string Helper::TimeConverter::time_to_string(const time_t time) {
-  char buf[19];
+  char buf[25];
   struct tm * timeinfo = localtime(&time);
-  strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M", timeinfo);
+  strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", timeinfo);
 
   return std::string { buf };
 }
