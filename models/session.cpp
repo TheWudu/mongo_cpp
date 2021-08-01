@@ -13,7 +13,7 @@ namespace Models {
         << " (offset: "      << this->start_time_timezone_offset << ")" << std::endl
       << "  end time:      " << Helper::TimeConverter::time_to_string(this->end_time) << std::endl
       << "  duration:      " << Helper::TimeConverter::ms_to_min_str(this->duration) << std::endl
-      << "  pause:         " << this->pause << std::endl
+      << "  pause:         " << Helper::TimeConverter::ms_to_min_str(this->pause) << std::endl
       << "  distance:      " << this->distance << std::endl
       << "  elevation_gain " << this->elevation_gain << std::endl
       << "  elevation_loss " << this->elevation_loss << std::endl

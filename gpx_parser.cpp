@@ -72,7 +72,7 @@ void GpxParser::calculate_stats() {
   this->start_time = start_time;
   this->end_time = end_time;
   this->duration = duration - pause * 1000;
-  this->pause    = pause;
+  this->pause    = pause * 1000;
   
   // std::cout << "Start time:     " << Helper::TimeConverter::time_to_string(start_time) << std::endl
   //           << "End time:       " << Helper::TimeConverter::time_to_string(end_time) << std::endl
