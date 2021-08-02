@@ -268,3 +268,22 @@ bool MongoDB::delete_one(std::string id) {
     return (result->deleted_count() == 1);
   }
 }
+
+uint32_t MongoDB::delete_many(time_t const from, time_t const to) {
+  bsoncxx::document::value query = document{} 
+    << "start_time" << open_document 
+      << "$gte" << time_t_to_b_date(from)
+      << "$lte" << time_t_to_b_date(to)
+      << close_document
+    << bsoncxx::builder::stream::finalize;
+
+  auto coll = collection("sessions");
+  auto result = coll.delete_many(query.view());
+ 
+  if(!result) { 
+    return 0;
+  }
+  else {
+    return result->deleted_count();
+  }
+}

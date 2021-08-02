@@ -63,6 +63,7 @@ public:
   bool exists(time_t start_time, int sport_type_id); 
 
   bool delete_one(std::string id);
+  uint32_t delete_many(time_t const from, time_t const to);
 
   void print_collection(std::string name);
 };

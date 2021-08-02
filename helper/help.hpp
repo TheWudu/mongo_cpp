@@ -59,8 +59,9 @@ void show_help_show() {
 
 void show_help_delete() {
   std::cout << "Delete session, deletes a single session by id. \n"
-            << "Possible parameters are: \n"
-            << "  -id=UID       e.g. 123-127382-12ab-123    no default\n"
+            << "Possible parameters are either: \n"
+            << "  -id=UID                          e.g. 123-127382-12ab-123, no default\n"
+            << "  -from=YYYY-MM-DD -to=YYYY-MM-DD  e.g. 2021-07-01,  no default\n"
             << std::endl;
 }
 

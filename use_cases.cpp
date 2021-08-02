@@ -25,6 +25,8 @@ void import_sessions() {
 void delete_sessions(std::map<std::string, std::string> const args) {
   MongoDB* mc = MongoDB::connection();
   std::string id;
+  time_t from; 
+  time_t to;
 
   try {
     id = args.at("-id");
@@ -39,7 +41,18 @@ void delete_sessions(std::map<std::string, std::string> const args) {
     }
   }
   catch (std::out_of_range&) {
-    std::cout << " missing -id=<some-id> parameter" << std::endl;
+  }
+
+  try {
+    from = Helper::TimeConverter::string_to_time_t(args.at("-from"));
+    to   = Helper::TimeConverter::string_to_time_t(args.at("-to"));
+
+    std::cout << "Deleting from: " << args.at("-from") << " to " << args.at("-to") << std::endl;
+
+    auto cnt = mc->delete_many(from, to);
+    std::cout << ".. deleted: " << cnt << " sessions" << std::endl;
+  }
+  catch (std::out_of_range&) {
   }
 }
 

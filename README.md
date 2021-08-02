@@ -20,13 +20,14 @@ exported recently and had that data in my hands when starting this.
 * List sessions, filter by from and to date, default to 30 days ago and now.
 * Allow command line usage (ls, show, stats..)
 * Delete a single session
+* Delete many (with e.g. start/end-time range)
 * Usage output (`./run help` and `./run help <cmd>`)
 
 ## Next ideas
 
 * Edit sessions
-* Delete many (with e.g. start/end-time range)
-
+* Elevation refinement
+* Timezone calculation for GPX parser (via lat/lng)
 
 ## Setup
 
