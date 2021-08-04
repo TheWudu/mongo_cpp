@@ -10,6 +10,7 @@
 #include "helper/time_converter.hpp"
 #include "helper/menu.hpp"
 #include "helper/help.hpp"
+#include "hgt_manager.hpp"
 #include "use_cases.hpp"
 
 
@@ -29,6 +30,14 @@ void parse_args(int argc, char* argv[], std::map<std::string, std::string>& args
 
 int main(int argc, char* argv[])
 {
+  HgtManager hgt;
+  double lat =  47.9809710569679737091064453125;
+  double lng =  13.1521513871848583221435546875;
+  int32_t ele = hgt.elevation(lat,lng);
+  std::cout << "Elevation: " << ele << std::endl;
+  return 0;
+
+
   if(argc > 1) {
 
     Arguments command = argv_to_arg(argv[1]);
