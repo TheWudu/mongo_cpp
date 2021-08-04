@@ -1,6 +1,6 @@
 #pragma once
 
-class HgtManager {
+class HgtReader {
 
 public:
 
@@ -8,6 +8,7 @@ public:
 
 private:
 
+  int32_t from_lat_lng(double lat, double lng);
   int32_t from_file(std::string const filename, uint32_t position);
 
 };
