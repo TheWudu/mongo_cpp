@@ -30,15 +30,6 @@ void parse_args(int argc, char* argv[], std::map<std::string, std::string>& args
 
 int main(int argc, char* argv[])
 {
-  HgtReader hgt;
-  // should result in ~ 597
-  double lat = 47.98080953769385814666748046875; 
-  double lng = 13.1520300172269344329833984375;
-
-  int32_t ele = hgt.elevation(lat,lng);
-  std::cout << "Elevation: " << ele << std::endl;
-  return 0;
-
 
   if(argc > 1) {
 

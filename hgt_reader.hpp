@@ -1,10 +1,13 @@
 #pragma once
 
+#define UNKNOWN_ELEVATION -32768
+#define THREE_ARC_SECONDS (3.0 / 60 / 60)
+
 class HgtReader {
 
 public:
 
-  int32_t elevation(double lat, double lng);
+  double elevation(double lat, double lng);
 
 private:
 

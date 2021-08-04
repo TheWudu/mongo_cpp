@@ -5,11 +5,8 @@
 #include <climits>
 #include "hgt_reader.hpp"
 
-#define UNKNOWN_ELEVATION -32768
-#define THREE_ARC_SECONDS (3.0 / 60 / 60) // 0.000833333333333333333 
-// 3.0 / 60 / 60)
 
-int32_t HgtReader::elevation(double lat, double lng) {
+double HgtReader::elevation(double lat, double lng) {
   // find north, south values for which we have srtm3 data points
   double lat_help = (lat / THREE_ARC_SECONDS);
 
@@ -62,7 +59,6 @@ int32_t HgtReader::elevation(double lat, double lng) {
     
   double elevation = -0.0;
     
-    
   if(north == south) {
     elevation = elevation_south; // both elevation_south and elevation_north would work here, because they are the same
   }
@@ -77,8 +73,10 @@ int32_t HgtReader::elevation(double lat, double lng) {
   if(elevation == -0.0) {
     elevation = (north-lat)/THREE_ARC_SECONDS*elevation_south + (lat-south)/THREE_ARC_SECONDS*elevation_north;
   }
+
+  // std::cout << "re" << elevation << std::endl;
   
-  return std::round(elevation);
+  return elevation;
 }
 
 int32_t HgtReader::from_lat_lng(double lat, double lng) {
@@ -104,10 +102,12 @@ int32_t HgtReader::from_lat_lng(double lat, double lng) {
         
   latDegree = (lat < 0) ? latDegree + 1 : latDegree;
   lngDegree = (lng < 0) ? lngDegree + 1 : lngDegree;
-       
+
   char buffer[24];  
-  std::sprintf(buffer, "%c%02d%c%03d.hgt",latOrientation,(uint32_t)latDegree,lngOrientation,(uint32_t)lngDegree);
+  std::sprintf(buffer, "%c%02d%c%03d.hgt",latOrientation,(uint16_t)(latDegree),lngOrientation,(uint16_t)lngDegree);
   std::string filename { buffer };
+ 
+  // std::cout << "file " << filename << std::endl;
 
   auto line = latMinute * 20 + std::round(latSecond * 0.333333333);
   if(lat >= 0) {
@@ -120,7 +120,11 @@ int32_t HgtReader::from_lat_lng(double lat, double lng) {
     sample = 1200 - sample;
   }
 
+  // std::cout << "line " << line << " sample: " << sample << std::endl;
+
   auto position = (line * 1201 + sample) * 2;
+  
+  // std::cout << "position " << position << std::endl;
 
   return from_file(filename, position);
 }
@@ -145,6 +149,8 @@ int32_t HgtReader::from_file(std::string const filename, uint32_t position) {
   if(elevation >= 32768) {
     elevation -= 65536;
   }
+
+  std::fclose(f);
 
   return elevation;
 }

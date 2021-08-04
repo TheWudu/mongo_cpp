@@ -8,6 +8,7 @@
 #include "helper/sport_types.hpp"
 #include "../models/session.hpp"
 #include "repository/mongo_db.hpp"
+#include "hgt_reader.hpp"
 
 #include "gpx_parser.hpp"
 
@@ -17,6 +18,8 @@ void GpxParser::parse_file(std::string const filename) {
   std::vector<gpx_tags> state;
 
   this->data.clear();
+  
+  // std::cout << "File: " << filename << std::endl;
 
   while (getline (filestream, line)) {
     if(state.size() != 0) {
@@ -85,14 +88,15 @@ void GpxParser::calculate_stats() {
 Models::Session* GpxParser::build_model() {
   calculate_stats();
 
+
   Models::Session* session = new Models::Session;
 
   session->id             = MongoDB::new_object_id();
   session->sport_type_id  = Helper::SportType::id(this->type); 
   session->distance       = (uint32_t)(this->distance);
   session->duration       = this->duration;
-  session->elevation_gain = this->elevation_gain;
-  session->elevation_loss = this->elevation_loss;
+  session->elevation_gain = std::round(this->elevation_gain);
+  session->elevation_loss = std::round(this->elevation_loss);
   session->start_time_timezone_offset = Helper::TimeConverter::local_timezone_offset(this->start_time);
   session->start_time     = this->start_time;
   session->end_time       = this->end_time;
@@ -183,6 +187,23 @@ void GpxParser::parse_state_trkpt(std::string line, std::vector<gpx_tags>& state
     this->elevation = std::stod(line.substr(pos + 5, line.find("</ele>") - 6));
     
     // std::cout << "Elevation: " << std::setprecision(5) << this->elevation << std::endl;
+
+    try {
+      HgtReader hgt;
+      // std::cout << "hgt: " << this->lat << ", " << this->lng << std::endl;
+      double ele = hgt.elevation(this->lat, this->lng);
+      if(ele != UNKNOWN_ELEVATION) {
+        // std::cout << "Refined elevation: " << ele << std::endl;
+        this->elevation = ele;
+      }
+    }
+    catch(const std::exception& ex) {
+      std::cout << ex.what() << std::endl;
+    }
+    catch(...) {
+      std::cout << "Something failed" << std::endl;
+    }
+    
   }
   
   pos = line.find("<time>");

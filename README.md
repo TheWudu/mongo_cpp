@@ -49,6 +49,7 @@ https://github.com/nlohmann/json
 
 Can be downloaded there:
 
+http://lic2.apemap.at/touren/hgt3/
 https://e4ftl01.cr.usgs.gov/MEASURES/SRTMGL3.003/2000.02.11/index.html
 
 ## Compilation
