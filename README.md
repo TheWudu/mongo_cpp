@@ -45,6 +45,12 @@ For json parsing I am using the json parser from nlohmann:
 
 https://github.com/nlohmann/json
 
+## SRTM3 data
+
+Can be downloaded there:
+
+https://e4ftl01.cr.usgs.gov/MEASURES/SRTMGL3.003/2000.02.11/index.html
+
 ## Compilation
 
 This project provides a simple makefile to compile the source files
