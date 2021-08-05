@@ -123,8 +123,6 @@ int32_t HgtReader::from_lat_lng(double lat, double lng) {
   return from_file(filename, position);
 }
 
-
-
 int32_t HgtReader::from_file(std::string const filename, uint32_t position) {
   int32_t elevation = UNKNOWN_ELEVATION;
 
@@ -133,6 +131,11 @@ int32_t HgtReader::from_file(std::string const filename, uint32_t position) {
   uint8_t buffer[10] = { 0x00 };
 
   std::FILE* f = std::fopen(filepath.c_str(), "rb");
+  if(f == nullptr) {
+    // std::cout << "Missing file: " << filepath << std::endl;
+    std::string error { "Missing file: " + filepath };
+    throw error;
+  }
   std::fseek(f, position, SEEK_SET);
   std::fread(buffer, 1, 2, f);
   elevation = (buffer[0] << 8 | buffer[1]);

@@ -36,6 +36,13 @@ void GpxParser::parse_file(std::string const filename) {
       state.push_back(gpx);
     }
   }
+
+  if(errors.size() > 0) {
+    std::cout << "Can not improve elevation of " << filename << std::endl;
+    for(auto msg : errors) {
+      std::cout << msg << std::endl;
+    }
+  }
 }
 
 void GpxParser::calculate_stats() {
@@ -189,7 +196,6 @@ void GpxParser::parse_state_trkpt(std::string line, std::vector<gpx_tags>& state
     // std::cout << "Elevation: " << std::setprecision(5) << this->elevation << std::endl;
 
     try {
-      HgtReader hgt;
       // std::cout << "hgt: " << this->lat << ", " << this->lng << std::endl;
       double ele = hgt.elevation(this->lat, this->lng);
       if(ele != UNKNOWN_ELEVATION) {
@@ -200,10 +206,12 @@ void GpxParser::parse_state_trkpt(std::string line, std::vector<gpx_tags>& state
     catch(const std::exception& ex) {
       std::cout << ex.what() << std::endl;
     }
+    catch(const std::string msg) {
+      errors.insert(msg);
+    }
     catch(...) {
       std::cout << "Something failed" << std::endl;
     }
-    
   }
   
   pos = line.find("<time>");

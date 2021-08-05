@@ -1,9 +1,12 @@
 #pragma once
 
 #include <vector>
+#include <set>
 #include <string>
 #include "helper/time_converter.hpp"
 #include "models/session.hpp"
+
+#include "hgt_reader.hpp"
 
 
 enum gpx_tags {
@@ -53,6 +56,9 @@ public:
   }
 
 private:
+      
+  HgtReader hgt;
+  std::set<std::string> errors;
 
   // per gpx trkpoint 
   double lat;
