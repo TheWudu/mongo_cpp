@@ -7,19 +7,16 @@
 
 
 double HgtReader::elevation(double lat, double lng) {
-  // find north, south values for which we have srtm3 data points
+  // find n,s,w,e values for which srtm3 data exists
   double lat_help = (lat / THREE_ARC_SECONDS);
+  double lng_help = (lng / THREE_ARC_SECONDS);
 
   double north = std::ceil(lat_help) * THREE_ARC_SECONDS;
   double south = std::floor(lat_help) * THREE_ARC_SECONDS;
-      
-  // find east, west values for which we have srtm3 data points
-  double lng_help = (lng / THREE_ARC_SECONDS);
-      
   double east = std::ceil(lng_help) * THREE_ARC_SECONDS;
   double west = std::floor(lng_help) * THREE_ARC_SECONDS;
 
-  //now get the elevation for North East, North West, ...
+  // get the elevation for these ne,nw,se,sw points
   int32_t elevation_ne = from_lat_lng(north,east);
   int32_t elevation_nw = from_lat_lng(north,west);
   int32_t elevation_se = from_lat_lng(south,east);
@@ -27,14 +24,13 @@ double HgtReader::elevation(double lat, double lng) {
 
   int32_t elevation_north = -INT_MAX;
   int32_t elevation_south = -INT_MAX; 
-         
-  // if lng is aligned to center of data pixel, interpolation does not work because we took the same data point for east and west
+   
+  // some fallbacks for edge-cases      
   if(east == west) {
-    elevation_north = elevation_nw; // both elevation_nw and elevation_ne would work here, because they are the same
-    elevation_south = elevation_sw; // both elevation_sw and elevation_se would work here, because they are the same
+    elevation_north = elevation_nw; 
+    elevation_south = elevation_sw;
   }
     
-  // if one elevation is undefined we make sure that we later won't use it in the interpolation
   if(elevation_ne == UNKNOWN_ELEVATION) {
     elevation_north = elevation_nw;
   }
@@ -48,7 +44,7 @@ double HgtReader::elevation(double lat, double lng) {
     elevation_south = elevation_se;
   }
     
-  // normally elevation_north and elevation_south will still be nil and we will do a bilinear interpolation 
+  // do an interpolation if north/south are not unknown
   if(elevation_north == -INT_MAX) {
     elevation_north = (east - lng) / THREE_ARC_SECONDS * elevation_nw + (lng - west) / THREE_ARC_SECONDS * elevation_ne; // horizontal interpolation (north)
   }
@@ -60,7 +56,7 @@ double HgtReader::elevation(double lat, double lng) {
   double elevation = -0.0;
     
   if(north == south) {
-    elevation = elevation_south; // both elevation_south and elevation_north would work here, because they are the same
+    elevation = elevation_south; 
   }
     
   if(elevation_north == UNKNOWN_ELEVATION) {
@@ -71,10 +67,8 @@ double HgtReader::elevation(double lat, double lng) {
   }
     
   if(elevation == -0.0) {
-    elevation = (north-lat)/THREE_ARC_SECONDS*elevation_south + (lat-south)/THREE_ARC_SECONDS*elevation_north;
+    elevation = (north - lat)/THREE_ARC_SECONDS*elevation_south + (lat-south)/THREE_ARC_SECONDS*elevation_north;
   }
-
-  // std::cout << "re" << elevation << std::endl;
   
   return elevation;
 }
