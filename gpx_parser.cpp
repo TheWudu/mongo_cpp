@@ -37,11 +37,20 @@ void GpxParser::parse_file(std::string const filename) {
     }
   }
 
+  print_errors(filename);
+}
+
+void GpxParser::print_errors(std::string const filename) {
   if(errors.size() > 0) {
-    std::cout << "Can not improve elevation of " << filename << std::endl;
-    for(auto msg : errors) {
-      std::cout << msg << std::endl;
+    std::cout << "Can not improve elevation of " << filename << std::endl
+              << "  missing: ";
+    for(auto msg = errors.begin(); msg != errors.end();) {
+      std::cout << *msg;
+      if((++msg) != errors.end()) {
+        std::cout << ", ";
+      }
     }
+    std::cout << std::endl;
   }
 }
 
@@ -197,7 +206,7 @@ void GpxParser::parse_state_trkpt(std::string line, std::vector<gpx_tags>& state
 
     try {
       // std::cout << "hgt: " << this->lat << ", " << this->lng << std::endl;
-      double ele = hgt.elevation(this->lat, this->lng);
+      double ele = HgtReader::elevation(this->lat, this->lng);
       if(ele != UNKNOWN_ELEVATION) {
         // std::cout << "Refined elevation: " << ele << std::endl;
         this->elevation = ele;
@@ -206,8 +215,8 @@ void GpxParser::parse_state_trkpt(std::string line, std::vector<gpx_tags>& state
     catch(const std::exception& ex) {
       std::cout << ex.what() << std::endl;
     }
-    catch(const std::string msg) {
-      errors.insert(msg);
+    catch(const std::string filename) {
+      errors.insert(filename);
     }
     catch(...) {
       std::cout << "Something failed" << std::endl;

@@ -133,8 +133,7 @@ int32_t HgtReader::from_file(std::string const filename, uint32_t position) {
   std::FILE* f = std::fopen(filepath.c_str(), "rb");
   if(f == nullptr) {
     // std::cout << "Missing file: " << filepath << std::endl;
-    std::string error { "Missing file: " + filepath };
-    throw error;
+    throw filename;
   }
   std::fseek(f, position, SEEK_SET);
   std::fread(buffer, 1, 2, f);

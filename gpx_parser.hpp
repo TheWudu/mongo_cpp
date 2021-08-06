@@ -57,7 +57,6 @@ public:
 
 private:
       
-  HgtReader hgt;
   std::set<std::string> errors;
 
   // per gpx trkpoint 
@@ -79,6 +78,7 @@ private:
   std::vector<GpxPoint*> data;
 
   void calculate_stats();
+  void print_errors(std::string const filename);
 
   void parse_state_gpx(std::string line, std::vector<gpx_tags>& state);
   void parse_state_trk(std::string line, std::vector<gpx_tags>& state);

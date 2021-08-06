@@ -45,9 +45,14 @@ For json parsing I am using the json parser from nlohmann:
 
 https://github.com/nlohmann/json
 
-## SRTM3 data
+## Elevation refinment and SRTM3 data
 
-Can be downloaded there:
+Elevations are refined when parsing GPX data if the necessary .hgt file is 
+available at `data/srtm3`. If necessary files are missing
+it is printed afterwards. The elevation is not refined then for these
+points. 
+
+SRTM3 hgt files Can be downloaded there:
 
 http://lic2.apemap.at/touren/hgt3/
 https://e4ftl01.cr.usgs.gov/MEASURES/SRTMGL3.003/2000.02.11/index.html
