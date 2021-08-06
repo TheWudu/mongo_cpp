@@ -40,10 +40,12 @@ namespace Helper {
       static const std::map<int, std::string> sport_types_map {
         {  1, "running" },
         {  3, "cycling" },
+        {  4, "mountain-biking" },
         {  5, "other" },
         {  7, "hiking" },
         {  9, "skiing" },
         { 19, "walking" },
+        { 22, "race-cycling" },
         { 26, "yoga" },
         { 31, "pilates" },
         { 32, "climbing" },
