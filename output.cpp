@@ -86,7 +86,7 @@ void Output::print_track_based_stats(mongocxx::v_noabi::cursor& cursor, std::vec
     double average_pace            = doc["average_pace"].get_double().value;
 
     std::cout << id << " (#" << overall_count << ")" << std::endl
-      << "  overall_distance:       " << std::setw(10) << overall_distance / 1000 << " [km], overall_duration:       " << Helper::TimeConverter::ms_to_min_str(overall_duration) << std::endl
+      << "  overall_distance:       " << std::setw(10) << std::fixed << std::setprecision(1) << overall_distance / 1000.0 << " [km], overall_duration:       " << Helper::TimeConverter::ms_to_min_str(overall_duration) << std::endl
       << "  overall_elevation_gain: " << std::setw(10) << overall_elevation_gain  << " [m],  overall_elevation_loss: " << overall_elevation_loss << " [m]" << std::endl
       << "  average_distance:       " << std::setw(10) << average_distance / 1000 << " [km], average_pace:           " << Helper::TimeConverter::secs_to_min_str(average_pace) << std::endl
       << std::endl;
