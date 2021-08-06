@@ -22,11 +22,11 @@ exported recently and had that data in my hands when starting this.
 * Delete a single session
 * Delete many (with e.g. start/end-time range)
 * Usage output (`./run help` and `./run help <cmd>`)
+* Elevation refinement using SRTM3
 
 ## Next ideas
 
 * Edit sessions
-* Elevation refinement
 * Timezone calculation for GPX parser (via lat/lng)
 
 ## Setup
