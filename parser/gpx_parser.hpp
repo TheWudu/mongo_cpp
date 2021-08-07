@@ -3,10 +3,14 @@
 #include <vector>
 #include <set>
 #include <string>
-#include "helper/time_converter.hpp"
-#include "models/session.hpp"
 
 #include "hgt_reader.hpp"
+
+#include "../helper/geokit.hpp"
+#include "../helper/sport_types.hpp"
+#include "../helper/time_converter.hpp"
+#include "../models/session.hpp"
+#include "../repository/mongo_db.hpp"
 
 
 enum gpx_tags {

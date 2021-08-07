@@ -4,8 +4,9 @@
 #include <map>
 #include <mongocxx/client.hpp>
 
-#include "models/session.hpp"
-#include "helper/time_converter.hpp"
+#include "../models/session.hpp"
+#include "../helper/time_converter.hpp"
+#include "../helper/sport_types.hpp"
 
 class Output {
 

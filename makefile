@@ -3,7 +3,7 @@
 CC        := g++
 LD        := g++
 
-MODULES   := helper use_case models repository .
+MODULES   := helper parser use_case models repository .
 SRC_DIR   := $(MODULES) # $(addprefix src/,$(MODULES))
 BUILD_DIR := $(addprefix build/,$(MODULES))
 

@@ -4,7 +4,7 @@
 #include <map>
 
 #include "menu.hpp"
-#include "../use_cases.hpp"
+#include "../use_case/use_cases.hpp"
 
 int show_main_menu() {
   std::string option;

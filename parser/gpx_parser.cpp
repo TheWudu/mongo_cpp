@@ -4,12 +4,6 @@
 #include <fstream>
 #include <boost/algorithm/string.hpp>
 
-#include "helper/geokit.hpp"
-#include "helper/sport_types.hpp"
-#include "../models/session.hpp"
-#include "repository/mongo_db.hpp"
-#include "hgt_reader.hpp"
-
 #include "gpx_parser.hpp"
 
 void GpxParser::parse_file(std::string const filename) {

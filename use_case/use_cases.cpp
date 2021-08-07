@@ -2,13 +2,14 @@
 #include <string>
 #include <boost/algorithm/string.hpp>
 
-#include "./repository/mongo_db.hpp"
-#include "./repository/statistics.hpp"
-#include "helper/time_converter.hpp"
-#include "helper/sport_types.hpp"
-#include "use_case/weight_import.hpp"
-#include "use_case/session_import.hpp"
-#include "use_case/session_show.hpp"
+#include "../repository/mongo_db.hpp"
+#include "../repository/statistics.hpp"
+#include "../helper/time_converter.hpp"
+#include "../helper/sport_types.hpp"
+
+#include "weight_import.hpp"
+#include "session_import.hpp"
+#include "session_show.hpp"
 
 #include "use_cases.hpp"
 

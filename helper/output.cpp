@@ -3,8 +3,6 @@
 #include <algorithm>
 
 #include "output.hpp"
-#include "helper/time_converter.hpp"
-#include "helper/sport_types.hpp"
 
 void Output::print_session_list(std::vector<Models::Session> sessions) {
   using namespace std;

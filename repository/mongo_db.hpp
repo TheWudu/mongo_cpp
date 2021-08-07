@@ -6,8 +6,8 @@
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/builder/stream/array.hpp>
 
-#include "models/weight.hpp"    
-#include "models/session.hpp"
+#include "../models/weight.hpp"    
+#include "../models/session.hpp"
 
 class MongoDB {
 

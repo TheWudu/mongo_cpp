@@ -9,9 +9,9 @@
 
 #include "../ext/json.hpp"
 #include "../repository/mongo_db.hpp"
-#include "../file_list.hpp"
-#include "../json_parser.hpp"
-#include "../gpx_parser.hpp"
+#include "../helper/file_list.hpp"
+#include "../parser/json_parser.hpp"
+#include "../parser/gpx_parser.hpp"
 #include "../helper/time_converter.hpp"
 #include "../helper/sport_types.hpp"
 

@@ -19,9 +19,9 @@
 #include <mongocxx/exception/exception.hpp>
 #include <mongocxx/exception/logic_error.hpp>
 
-#include "helper/time_converter.hpp"
-#include "helper/sport_types.hpp"
-#include "output.hpp"
+#include "../helper/time_converter.hpp"
+#include "../helper/sport_types.hpp"
+#include "../helper/output.hpp"
 
 using namespace mongocxx;
 
