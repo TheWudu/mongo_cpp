@@ -4,6 +4,7 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string.hpp>
+#include <time.h>
 
 int32_t Helper::TimeConverter::local_timezone_offset(const time_t time) {
   std::string local_time_str = Helper::TimeConverter::time_to_string(time);
@@ -30,6 +31,20 @@ std::size_t replace_all(std::string& inout, std::string_view what, std::string_v
         inout.replace(pos, what.length(), with.data(), with.length());
     }
     return count;
+}
+
+void Helper::TimeConverter::set_timezone(std::string const timezone) {
+  setenv("TZ", timezone.c_str(), 1);
+  tzset();
+}
+
+std::string Helper::TimeConverter::get_timezone() {
+  char* ctz = getenv("TZ");
+  if(ctz != nullptr) {
+    std::string tz { ctz };
+    return tz;
+  }
+  return "Europe/Vienna";
 }
 
 time_t Helper::TimeConverter::date_time_string_to_time_t(std::string time_str) {

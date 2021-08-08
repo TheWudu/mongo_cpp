@@ -57,6 +57,12 @@ SRTM3 hgt files Can be downloaded there:
 http://lic2.apemap.at/touren/hgt3/
 https://e4ftl01.cr.usgs.gov/MEASURES/SRTMGL3.003/2000.02.11/index.html
 
+## Geonames parsing
+
+If a geonames city file is present ("/data/cities1000.txt"), it checks
+the timezone of a gpx parsed file by it's corrdinates to determine
+the right timezone offset, it falls back to UTC.
+
 ## Compilation
 
 This project provides a simple makefile to compile the source files

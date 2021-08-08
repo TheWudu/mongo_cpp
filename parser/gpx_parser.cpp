@@ -4,6 +4,7 @@
 #include <fstream>
 #include <boost/algorithm/string.hpp>
 
+#include "geonames_parser.hpp"
 #include "gpx_parser.hpp"
 
 void GpxParser::parse_file(std::string const filename) {
@@ -98,6 +99,10 @@ void GpxParser::calculate_stats() {
 Models::Session* GpxParser::build_model() {
   calculate_stats();
 
+  auto p = data.front();
+  std::string timezone = GeonamesParser::instance()->timezone_for(p->lat, p->lng);
+  Helper::TimeConverter::set_timezone(timezone);
+  // std::cout << "Timezone: " << timezone << ", offset: " << Helper::TimeConverter::local_timezone_offset(this->start_time) << std::endl;
 
   Models::Session* session = new Models::Session;
 
@@ -112,7 +117,7 @@ Models::Session* GpxParser::build_model() {
   session->end_time       = this->end_time;
   session->notes          = this->name; 
   session->pause          = this->pause;
-
+  
   // session->print();
 
   return session;

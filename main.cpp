@@ -3,15 +3,14 @@
 #include <vector>
 #include <map>
 #include <string>
-#include <ctime>
 #include <boost/algorithm/string.hpp>
 
 #include "helper/args.hpp"
-#include "helper/time_converter.hpp"
 #include "helper/menu.hpp"
 #include "helper/help.hpp"
-#include "hgt_reader.hpp"
-#include "use_cases.hpp"
+#include "helper/time_converter.hpp"
+#include "use_case/use_cases.hpp"
+#include "parser/geonames_parser.hpp"
 
 
 void parse_args(int argc, char* argv[], std::map<std::string, std::string>& args) {
@@ -30,7 +29,6 @@ void parse_args(int argc, char* argv[], std::map<std::string, std::string>& args
 
 int main(int argc, char* argv[])
 {
-
   if(argc > 1) {
 
     Arguments command = argv_to_arg(argv[1]);

@@ -37,6 +37,8 @@ void UseCase::SessionImport::read_gpx_files() {
 
   std::cout << "Found: " << files.size() << " GPX files" << std::endl;
 
+  std::string timezone = Helper::TimeConverter::get_timezone();
+
   for(auto filename = files.begin(); filename != files.end(); filename++) {
     GpxParser gpx = GpxParser();
 
@@ -44,6 +46,8 @@ void UseCase::SessionImport::read_gpx_files() {
     Models::Session* session = gpx.build_model();
     this->data.push_back(session); 
   }
+  
+  Helper::TimeConverter::set_timezone(timezone);
 }
 
 void UseCase::SessionImport::read_garmin_csv() {
