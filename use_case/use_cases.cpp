@@ -6,6 +6,7 @@
 #include "../repository/statistics.hpp"
 #include "../helper/time_converter.hpp"
 #include "../helper/sport_types.hpp"
+#include "../parser/geonames_parser.hpp"
 
 #include "weight_import.hpp"
 #include "session_import.hpp"
@@ -21,6 +22,11 @@ void import_weights() {
 void import_sessions() {
   UseCase::SessionImport rs_import;
   rs_import.import();
+}
+
+void import_cities() {
+  GeonamesParser* geo = GeonamesParser::instance();
+  geo->store_to_mongo();
 }
 
 void delete_sessions(std::map<std::string, std::string> const args) {

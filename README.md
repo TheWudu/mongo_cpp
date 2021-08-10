@@ -63,6 +63,18 @@ If a geonames city file is present ("/data/cities1000.txt"), it checks
 the timezone of a gpx parsed file by it's corrdinates to determine
 the right timezone offset, it falls back to UTC.
 
+Storing to mongo and creating the index:
+
+```
+./run cities_import
+```
+
+```
+mongo
+> use test
+> db.cities.createIndex( { location: "2dsphere" } )
+```
+
 ## Compilation
 
 This project provides a simple makefile to compile the source files

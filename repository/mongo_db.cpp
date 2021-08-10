@@ -63,6 +63,64 @@ void MongoDB::insert(Models::Weight weight) {
   auto coll = collection("weights");
   bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc_value.view());
 }
+
+void MongoDB::insert(Models::City& city) {
+  auto builder = bsoncxx::builder::stream::document{};
+
+  bsoncxx::document::value doc_value = builder
+    << "name" << city.name
+    << "timezone" << city.timezone
+    << "location" << open_document
+      << "type" << "Point" 
+      << "coordinates" << open_array
+        << city.lng << city.lat
+        << close_array
+      << close_document
+    << bsoncxx::builder::stream::finalize;
+
+  auto coll = collection("cities");
+  bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc_value.view());
+}
+
+bool MongoDB::find_nearest_city(double lat, double lng, Models::City* city) {
+  // > db.cities.find( { location: { $geoNear: { $geometry: { "type": "Point", coordinates: [13.15228499472141265869140625, 47.98088564537465572357177734375] } } } } ).limit(1)
+  // or
+  // db.cities.aggregate([ { $geoNear: { near: { "type": "Point", coordinates: [13.15228499472141265869140625, 47.98088564537465572357177734375] }, spherical: true, distanceField: "calcDistance" } }, { $limit: 1 } ] )
+  mongocxx::options::find opts;
+  opts.limit( 1 );  
+
+  bsoncxx::document::value query = document{} 
+    << "location"   << open_document 
+      << "$geoNear" << open_document
+        << "$geometry" << open_document
+            << "type" << "Point"
+            << "coordinates" << open_array
+              << lng << lat
+            << close_array
+          << close_document
+        << close_document
+      << close_document
+    << bsoncxx::builder::stream::finalize;
+  
+  auto coll = collection("cities");
+  bsoncxx::stdx::optional<bsoncxx::document::value> result = coll.find_one(query.view(), opts);
+
+  // std::cout << bsoncxx::to_json(result->view()) << std::endl;
+  
+  if(!result) { 
+    return false;
+  }
+  else {
+    auto data = result->view();
+
+    city->name     = data["name"].get_utf8().value.to_string();
+    city->timezone = data["timezone"].get_utf8().value.to_string();
+    city->lat      = data["location"]["coordinates"][1].get_double().value;
+    city->lng      = data["location"]["coordinates"][0].get_double().value;
+  
+    return true;
+  }
+}
   
 bsoncxx::types::b_date MongoDB::time_t_to_b_date(time_t time) {
   std::chrono::system_clock::time_point tp = std::chrono::system_clock::from_time_t(time);

@@ -12,6 +12,8 @@
 #include "use_case/use_cases.hpp"
 #include "parser/geonames_parser.hpp"
 
+#include "repository/mongo_db.hpp"
+
 
 void parse_args(int argc, char* argv[], std::map<std::string, std::string>& args) {
   std::vector<std::string> strs;
@@ -53,6 +55,8 @@ int main(int argc, char* argv[])
         import_weights(); break;
       case session_import:
         import_sessions(); break;
+      case cities_import:
+        import_cities(); break;
       case help:
         if(argc == 3) {
           show_help(argv[2]);

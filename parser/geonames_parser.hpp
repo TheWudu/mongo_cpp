@@ -1,14 +1,7 @@
 #pragma once
 
 #include <vector>
-
-class City {
-public:
-  double lat;
-  double lng;
-  std::string name;
-  std::string timezone; 
-};
+#include "../models/city.hpp"
 
 class GeonamesParser {
 
@@ -32,16 +25,16 @@ public:
   }
 
   std::string timezone_for(double const lat, double const lng);
-  City* nearest(double const lat, double const lng);
+  Models::City* nearest(double const lat, double const lng);
+
+  void store_to_mongo();
   
 private:
   
-  GeonamesParser() {
-    parse_file();
-  }
+  GeonamesParser() {}
 
   static GeonamesParser* _inst; 
-  std::vector<City*> cities;
+  std::vector<Models::City*> cities;
 
   void parse_file();
 

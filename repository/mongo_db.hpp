@@ -8,6 +8,7 @@
 
 #include "../models/weight.hpp"    
 #include "../models/session.hpp"
+#include "../models/city.hpp"
 
 class MongoDB {
 
@@ -48,6 +49,7 @@ public:
 
   void insert(Models::Weight weight);
   void insert(Models::Session session);
+  void insert(Models::City& city);
   
   static void sport_type_matcher(bsoncxx::builder::stream::document& matcher, std::vector<int> sport_type_ids);
   static void year_matcher(bsoncxx::builder::stream::document& matcher, std::vector<int> years);
@@ -58,6 +60,7 @@ public:
 
   bool find(std::string id, Models::Weight* weight);
   bool find(std::string id, Models::Session* session);
+  bool find_nearest_city(double lat, double lng, Models::City* city);
 
   bool exists(std::string colname, std::string id);
   bool exists(time_t start_time, int sport_type_id); 
