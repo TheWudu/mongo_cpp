@@ -82,6 +82,23 @@ void MongoDB::insert(Models::City& city) {
   bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc_value.view());
 }
 
+void MongoDB::create_geo_index() {
+  bsoncxx::builder::stream::document index_builder = bsoncxx::builder::stream::document{};
+  auto index = index_builder 
+    << "location" << "2dsphere" 
+    << bsoncxx::builder::stream::finalize;
+
+  mongocxx::options::index index_options{};
+  index_options.name("geolocation");
+  
+  std::cout << bsoncxx::to_json(index.view()) << std::endl;
+
+  auto coll = collection("cities");
+  auto result = coll.create_index(index.view(), index_options);
+
+  std::cout << bsoncxx::to_json(result.view()) << std::endl;
+}
+
 bool MongoDB::find_nearest_city(double lat, double lng, Models::City* city) {
   // > db.cities.find( { location: { $geoNear: { $geometry: { "type": "Point", coordinates: [13.15228499472141265869140625, 47.98088564537465572357177734375] } } } } ).limit(1)
   // or

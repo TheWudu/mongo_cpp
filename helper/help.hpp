@@ -11,6 +11,7 @@ void show_help() {
     << "  ls,             list the session" << std::endl
     << "  session_import, import sessions from data/Sport-sessions" << std::endl
     << "  weight_import,  import weights from data/Weight" << std::endl
+    << "  cities_import,  import cities into mongodb" << std::endl
     << "  show,           shows a single session" << std::endl
     << "  delete,         delete a single session" << std::endl
     << "  stats,          prints statistics" << std::endl
@@ -37,6 +38,13 @@ void show_help_weight_import() {
             << "data/Weight folder into the local mongodb. Also checks \n"
             << "if the weight already exists via id. \n"
             << "No additional parameters available"
+            << std::endl;
+}
+
+void show_help_cities_import() {
+  std::cout << "Import cities, import cities from file to mongodb. \n"
+            << "Possible filters are: \n"
+            << "  -file=<filepath>        e.g. data/cities500.txt, default: data/cities1000.txt. \n"
             << std::endl;
 }
 
@@ -83,6 +91,7 @@ void show_help(std::string const command) {
     case ls:             show_help_ls(); break;
     case session_import: show_help_session_import(); break;
     case weight_import:  show_help_weight_import();  break;
+    case cities_import:  show_help_cities_import();  break;
     case show:           show_help_show(); break;
     case del:            show_help_delete(); break;
     case stats:          show_help_stats(); break;

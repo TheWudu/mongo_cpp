@@ -32,7 +32,7 @@ Models::City* GeonamesParser::nearest(double const lat, double const lng) {
   uint32_t dist = INT_MAX;
   if(cities.size() == 0) {
 std::cout << "nearest: parse file" << std::endl;
-    parse_file();
+    parse_default_file();
   }
 
   for(Models::City* c : cities) {
@@ -46,11 +46,20 @@ std::cout << "nearest: parse file" << std::endl;
   return nearest;
 }
 
-void GeonamesParser::parse_file() {
+void GeonamesParser::parse_default_file() {
   std::string filename { "data/cities1000.txt" };
+  parse_file(filename);
+}
+
+void GeonamesParser::parse_file(std::string const filename) {
   std::ifstream filestream(filename);
   std::string line;
   std::vector<std::string> strs;
+
+  if(!filestream.is_open()) {
+    std::cout << "Can't open " << filename << ", skipping" << std::endl;
+    return;
+  }
 
   std::cout << "Parsing " << filename << " ... " << std::endl;
 
@@ -77,11 +86,20 @@ void GeonamesParser::parse_file() {
 void GeonamesParser::store_to_mongo() {
   if(cities.size() == 0) {
 std::cout << "store to mongo parse file" << std::endl;
-    parse_file();
+    parse_default_file();
   }
+
+  std::cout << "Importing " << cities.size() << " cities ..." << std::endl;
 
   MongoDB* mc = MongoDB::connection();
   for(Models::City* c : cities) {
     mc->insert(*c);    
   }
+  
+  std::cout << " ... [DONE]" << std::endl;
+  std::cout << "Creating Index ... ";
+
+  mc->create_geo_index();
+  
+  std::cout << " [DONE]" << std::endl;
 }

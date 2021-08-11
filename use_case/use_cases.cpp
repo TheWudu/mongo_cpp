@@ -24,8 +24,16 @@ void import_sessions() {
   rs_import.import();
 }
 
-void import_cities() {
+void import_cities(std::map<std::string, std::string> const args) {
+  std::string filename;
   GeonamesParser* geo = GeonamesParser::instance();
+  try {
+    filename = args.at("-file");
+  }
+  catch (std::out_of_range&) {
+    filename = "data/cities1000.txt";
+  }
+  geo->parse_file(filename);
   geo->store_to_mongo();
 }
 

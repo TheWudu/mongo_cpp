@@ -59,21 +59,24 @@ https://e4ftl01.cr.usgs.gov/MEASURES/SRTMGL3.003/2000.02.11/index.html
 
 ## Geonames parsing
 
-If a geonames city file is present ("/data/cities1000.txt"), it checks
+If a geonames city file is present (defaults to: "/data/cities1000.txt"), it checks
 the timezone of a gpx parsed file by it's corrdinates to determine
 the right timezone offset, it falls back to UTC.
 
-Storing to mongo and creating the index:
+You can also import cities to mongodb using the cities_import with the -file 
+argument. The cities files can be downloaded there:
+
+http://download.geonames.org/export/dump/
+http://download.geonames.org/export/dump/cities500.zip
+http://download.geonames.org/export/dump/cities1000.zip
+
+It is recommended to import the cities to mongo:
 
 ```
-./run cities_import
+./run cities_import -file=data/cities500.txt
 ```
 
-```
-mongo
-> use test
-> db.cities.createIndex( { location: "2dsphere" } )
-```
+As this would be much faster than reading the huge file on each import.
 
 ## Compilation
 

@@ -28,6 +28,7 @@ public:
   Models::City* nearest(double const lat, double const lng);
 
   void store_to_mongo();
+  void parse_file(std::string filename);
   
 private:
   
@@ -36,6 +37,6 @@ private:
   static GeonamesParser* _inst; 
   std::vector<Models::City*> cities;
 
-  void parse_file();
+  void parse_default_file();
 
 };

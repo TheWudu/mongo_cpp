@@ -56,7 +56,8 @@ int main(int argc, char* argv[])
       case session_import:
         import_sessions(); break;
       case cities_import:
-        import_cities(); break;
+        parse_args(argc, argv, args);
+        import_cities(args); break;
       case help:
         if(argc == 3) {
           show_help(argv[2]);
