@@ -40,7 +40,7 @@ repositories docker-compose.yml file. Or install a local mongo
 or adapt the mongo connection uri to match your setup.
 
 Necessary librares: 
-* boost (e.g. libboost-all-dev)
+* boost (on ubuntu it is: libboost-date-time-dev, libboost-dev)
 * mongocxx + bsoncxx
 
 ## JSON Parsing
