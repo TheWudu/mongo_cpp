@@ -39,6 +39,10 @@ Install docker + docker-compose to start a mongodb using this
 repositories docker-compose.yml file. Or install a local mongo
 or adapt the mongo connection uri to match your setup.
 
+Necessary librares: 
+* boost (e.g. libboost-all-dev)
+* mongocxx + bsoncxx
+
 ## JSON Parsing
 
 For json parsing I am using the json parser from nlohmann:
