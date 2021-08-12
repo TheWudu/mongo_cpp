@@ -92,8 +92,9 @@ std::cout << "store to mongo parse file" << std::endl;
     parse_default_file();
   }
   
-  std::cout << "Creating Index ... ";
+  std::cout << "Creating Indexes ... " << std::endl;
   mc->create_geo_index();
+  mc->create_location_index();
   
   std::cout << " [DONE]" << std::endl;
 
@@ -103,14 +104,16 @@ std::cout << "store to mongo parse file" << std::endl;
 
   Models::City cx;
   for(Models::City* c : cities) {
-    if(!mc->find_nearest_city(c->lat, c->lng, &cx, 1000)) {
+    // if(!mc->find_nearest_city(c->lat, c->lng, &cx, 1000)) {
+    if(!mc->city_exist(c->lat, c->lng)) {
+      // std::cout << std::endl << "inserting" << c->name << ", " << c->lat << ", " << c->lng << std::endl;
       mc->insert(*c);    
       icnt++;
     }
     else {
       fcnt++;
     }
-    if( (icnt+fcnt) % (size/1000) == 0) {
+    if( (icnt+fcnt) % (size/100) == 0) {
       std::cout << "." << std::flush;
     }
 

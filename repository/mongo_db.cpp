@@ -82,6 +82,33 @@ void MongoDB::insert(Models::City& city) {
   bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc_value.view());
 }
 
+void MongoDB::create_location_index() {
+  auto coll = collection("cities");
+  auto indexes = coll.list_indexes();
+  std::string index_name { "location" };
+
+  for(auto index : indexes) {
+    if(index["name"].get_utf8().value.to_string() == index_name) {
+      std::cout << index_name << " index already exists, skip creation" << std::endl;
+      return;
+    }
+  }
+
+  bsoncxx::builder::stream::document index_builder = bsoncxx::builder::stream::document{};
+  auto index = index_builder 
+    << "location" << 1
+    << bsoncxx::builder::stream::finalize;
+
+  mongocxx::options::index index_options{};
+  index_options.name(index_name);
+  
+  std::cout << bsoncxx::to_json(index.view()) << std::endl;
+
+  auto result = coll.create_index(index.view(), index_options);
+
+  std::cout << bsoncxx::to_json(result.view()) << std::endl;
+}
+
 void MongoDB::create_geo_index() {
 
   auto coll = collection("cities");
@@ -140,7 +167,7 @@ bool MongoDB::find_nearest_city(double lat, double lng, Models::City* city, uint
   
   bsoncxx::stdx::optional<bsoncxx::document::value> result = coll.find_one(query.view(), opts);
 
-  // std::cout << bsoncxx::to_json(result->view()) << std::endl;
+  //std::cout << bsoncxx::to_json(result->view()) << std::endl;
   
   if(!result) { 
     return false;
@@ -280,12 +307,10 @@ bool MongoDB::city_exist(double lat, double lng) {
     << bsoncxx::builder::stream::finalize;
 
   auto coll = collection("cities");
-
-
   int64_t count = coll.count_documents(query.view());
 
-  std::cout << bsoncxx::to_json(query.view()) << " - " << count << std::endl;
-  if(count == 1) { 
+  //std::cout << bsoncxx::to_json(query.view()) << " - " << count << std::endl;
+  if(count > 0) { 
     return true;
   }
   return false;

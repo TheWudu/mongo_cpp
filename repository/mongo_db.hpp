@@ -52,6 +52,7 @@ public:
   void insert(Models::City& city);
 
   void create_geo_index();
+  void create_location_index();
   
   static void sport_type_matcher(bsoncxx::builder::stream::document& matcher, std::vector<int> sport_type_ids);
   static void year_matcher(bsoncxx::builder::stream::document& matcher, std::vector<int> years);
