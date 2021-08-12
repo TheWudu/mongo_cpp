@@ -83,26 +83,44 @@ void MongoDB::insert(Models::City& city) {
 }
 
 void MongoDB::create_geo_index() {
+
+  auto coll = collection("cities");
+  auto indexes = coll.list_indexes();
+  std::string index_name { "geolocation" };
+
+  for(auto index : indexes) {
+    // std::cout << bsoncxx::to_json(index) << std::endl;
+    if(index["name"].get_utf8().value.to_string() == index_name) {
+      std::cout << "Index already exists, skip creation" << std::endl;
+      return;
+    }
+  }
+
   bsoncxx::builder::stream::document index_builder = bsoncxx::builder::stream::document{};
   auto index = index_builder 
     << "location" << "2dsphere" 
     << bsoncxx::builder::stream::finalize;
 
   mongocxx::options::index index_options{};
-  index_options.name("geolocation");
+  index_options.name(index_name);
   
   std::cout << bsoncxx::to_json(index.view()) << std::endl;
 
-  auto coll = collection("cities");
   auto result = coll.create_index(index.view(), index_options);
 
   std::cout << bsoncxx::to_json(result.view()) << std::endl;
 }
 
-bool MongoDB::find_nearest_city(double lat, double lng, Models::City* city) {
+bool MongoDB::find_nearest_city(double lat, double lng, Models::City* city, uint32_t maxdist) {
   // > db.cities.find( { location: { $geoNear: { $geometry: { "type": "Point", coordinates: [13.15228499472141265869140625, 47.98088564537465572357177734375] } } } } ).limit(1)
   // or
   // db.cities.aggregate([ { $geoNear: { near: { "type": "Point", coordinates: [13.15228499472141265869140625, 47.98088564537465572357177734375] }, spherical: true, distanceField: "calcDistance" } }, { $limit: 1 } ] )
+  
+  auto coll = collection("cities");
+  bsoncxx::document::value equery = document{} << bsoncxx::builder::stream::finalize; 
+  if(coll.count_documents(equery.view()) == 0) {
+    return false;
+  }
   mongocxx::options::find opts;
   opts.limit( 1 );  
 
@@ -114,12 +132,12 @@ bool MongoDB::find_nearest_city(double lat, double lng, Models::City* city) {
             << "coordinates" << open_array
               << lng << lat
             << close_array
-          << close_document
+          << close_document 
+        << "$maxDistance" << (int)maxdist
         << close_document
       << close_document
     << bsoncxx::builder::stream::finalize;
   
-  auto coll = collection("cities");
   bsoncxx::stdx::optional<bsoncxx::document::value> result = coll.find_one(query.view(), opts);
 
   // std::cout << bsoncxx::to_json(result->view()) << std::endl;
@@ -245,6 +263,28 @@ bool MongoDB::exists(std::string colname, std::string id) {
   auto coll = collection(colname);
   int64_t count = coll.count_documents(query.view());
  
+  if(count == 1) { 
+    return true;
+  }
+  return false;
+}
+
+bool MongoDB::city_exist(double lat, double lng) {
+  bsoncxx::document::value query = document{} 
+    << "location"   << open_document
+      << "type" << "Point" 
+      << "coordinates" << open_array
+        << lng << lat
+        << close_array
+      << close_document
+    << bsoncxx::builder::stream::finalize;
+
+  auto coll = collection("cities");
+
+
+  int64_t count = coll.count_documents(query.view());
+
+  std::cout << bsoncxx::to_json(query.view()) << " - " << count << std::endl;
   if(count == 1) { 
     return true;
   }

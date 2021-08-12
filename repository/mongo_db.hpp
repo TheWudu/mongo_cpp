@@ -62,10 +62,11 @@ public:
 
   bool find(std::string id, Models::Weight* weight);
   bool find(std::string id, Models::Session* session);
-  bool find_nearest_city(double lat, double lng, Models::City* city);
+  bool find_nearest_city(double lat, double lng, Models::City* city, uint32_t maxdist = 10000);
 
   bool exists(std::string colname, std::string id);
   bool exists(time_t start_time, int sport_type_id); 
+  bool city_exist(double lat, double lng);
 
   bool delete_one(std::string id);
   uint32_t delete_many(time_t const from, time_t const to);

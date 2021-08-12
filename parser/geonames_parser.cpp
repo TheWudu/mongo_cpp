@@ -84,22 +84,39 @@ void GeonamesParser::parse_file(std::string const filename) {
 }
 
 void GeonamesParser::store_to_mongo() {
+  MongoDB* mc = MongoDB::connection();
+  int icnt = 0;
+  int fcnt = 0;
   if(cities.size() == 0) {
 std::cout << "store to mongo parse file" << std::endl;
     parse_default_file();
   }
-
-  std::cout << "Importing " << cities.size() << " cities ..." << std::endl;
-
-  MongoDB* mc = MongoDB::connection();
-  for(Models::City* c : cities) {
-    mc->insert(*c);    
-  }
   
-  std::cout << " ... [DONE]" << std::endl;
   std::cout << "Creating Index ... ";
-
   mc->create_geo_index();
   
   std::cout << " [DONE]" << std::endl;
+
+  std::cout << "Importing " << cities.size() << " cities ..." << std::endl;
+
+  int size = cities.size();
+
+  Models::City cx;
+  for(Models::City* c : cities) {
+    if(!mc->find_nearest_city(c->lat, c->lng, &cx, 1000)) {
+      mc->insert(*c);    
+      icnt++;
+    }
+    else {
+      fcnt++;
+    }
+    if( (icnt+fcnt) % (size/1000) == 0) {
+      std::cout << "." << std::flush;
+    }
+
+  }
+  
+  std::cout << " ... [DONE]" << std::endl;
+  std::cout << "Found: " << fcnt << ", inserted: " << icnt << " cities" << std::endl;
+
 }
