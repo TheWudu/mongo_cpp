@@ -52,6 +52,7 @@ public:
   void insert(Models::City& city);
 
   void create_geo_index();
+  void create_location_index();
   
   static void sport_type_matcher(bsoncxx::builder::stream::document& matcher, std::vector<int> sport_type_ids);
   static void year_matcher(bsoncxx::builder::stream::document& matcher, std::vector<int> years);
@@ -62,10 +63,11 @@ public:
 
   bool find(std::string id, Models::Weight* weight);
   bool find(std::string id, Models::Session* session);
-  bool find_nearest_city(double lat, double lng, Models::City* city);
+  bool find_nearest_city(double lat, double lng, Models::City* city, uint32_t maxdist = 10000);
 
   bool exists(std::string colname, std::string id);
   bool exists(time_t start_time, int sport_type_id); 
+  bool city_exist(double lat, double lng);
 
   bool delete_one(std::string id);
   uint32_t delete_many(time_t const from, time_t const to);

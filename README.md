@@ -23,11 +23,11 @@ exported recently and had that data in my hands when starting this.
 * Delete many (with e.g. start/end-time range)
 * Usage output (`./run help` and `./run help <cmd>`)
 * Elevation refinement using SRTM3
+* Timezone calculation for GPX parser (via lat/lng and geonames)
 
 ## Next ideas
 
 * Edit sessions
-* Timezone calculation for GPX parser (via lat/lng)
 
 ## Setup
 
