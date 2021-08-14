@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <vector>
 #include <utility> // for std::pair
+#include <cmath>
 
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
@@ -22,6 +23,7 @@
 #include "../helper/time_converter.hpp"
 #include "../helper/sport_types.hpp"
 #include "../helper/output.hpp"
+#include "../models/distance_bucket.hpp"
 
 using namespace mongocxx;
 
@@ -40,6 +42,7 @@ void Statistics::aggregate_stats(std::vector<int> years, std::vector<int> sport_
   aggregate_years(years, sport_type_ids);
   aggregate_weekdays(years, sport_type_ids);
   aggregate_hour_of_day(years, sport_type_ids);
+  aggregate_bucket_by_distance(years, sport_type_ids);
 }
 
 /* 
@@ -198,7 +201,7 @@ std::vector<std::pair<std::string, int>> Statistics::build_hour_vector(mongocxx:
     int val = doc["count"].get_int32().value;
     int hour = doc["_id"].get_int32().value;
 
-    hourvec.push_back(make_pair(Helper::TimeConverter::hour_to_time_str(hour), val));
+    hourvec.push_back(std::make_pair(Helper::TimeConverter::hour_to_time_str(hour), val));
   }
   return hourvec;
 }
@@ -234,4 +237,65 @@ void Statistics::aggregate_hour_of_day(std::vector<int> years, std::vector<int> 
   auto hourvec = build_hour_vector(cursor);
 
   Output::print_vector("Sessions per hour of day", hourvec);
+}
+
+/*
+  db.sessions.aggregate([
+    { $match: { year: { $in: [2020,2021] }, sport_type_id: 1 } }, 
+    { $bucket: { 
+        groupBy: "$distance", 
+        boundaries: [0,5000,10000,20000,Infinity], 
+        output: { 
+          total: { $sum: 1 }, 
+          avg_distance: { $avg: "$distance" }, 
+          sum_distance: { $sum: "$distance" }, 
+          sum_duration: { $sum: "$duration" } 
+        } 
+      } 
+    }
+  ])
+*/
+void Statistics::aggregate_bucket_by_distance(std::vector<int> years, std::vector<int> sport_type_ids) {
+  using namespace bsoncxx::builder::basic;
+
+  mongocxx::pipeline p{};
+
+  auto matcher = bsoncxx::builder::stream::document {};
+  MongoDB::sport_type_matcher(matcher, sport_type_ids);
+  MongoDB::year_matcher(matcher, years);
+
+  std::vector<int> boundaries { 0, 5000, 10000, 20000, 50000, 100000 };
+
+  p.match(matcher.view());
+  p.bucket(make_document(
+    kvp("groupBy", "$distance"),
+    kvp("boundaries", MongoDB::vector_to_array(boundaries)),
+    kvp("output", make_document(
+      kvp("total", make_document(kvp("$sum", 1))),
+      kvp("avg_distance", make_document(kvp("$avg", "$distance"))),
+      kvp("sum_distance", make_document(kvp("$sum", "$distance"))),
+      kvp("sum_duration", make_document(kvp("$sum", "$duration")))
+    ))));
+
+  MongoDB* mc = MongoDB::connection();
+  auto cursor = mc->collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+
+  std::vector<DistanceBucket> buckets;
+  
+  for(auto doc : cursor) {
+    //std::cout << bsoncxx::to_json(doc) << std::endl;
+
+    uint32_t bound = doc["_id"].get_int32().value;
+
+    DistanceBucket bucket;
+    bucket.bound    = doc["_id"].get_int32().value;
+    bucket.total    = doc["total"].get_int32().value;
+    bucket.avg_dist = std::round(doc["avg_distance"].get_double().value);
+    bucket.sum_dist = doc["sum_distance"].get_int32().value;
+    bucket.sum_dur  = doc["sum_duration"].get_int32().value;
+
+    buckets.push_back(bucket);
+  }
+
+  Output::print_buckets(buckets);
 }

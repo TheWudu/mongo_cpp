@@ -26,6 +26,8 @@ private:
   void aggregate_hour_of_day(std::vector<int> years, std::vector<int> sport_type_ids);
   void aggregate_years(std::vector<int> years, std::vector<int> sport_type_ids);
 
+  void aggregate_bucket_by_distance(std::vector<int> years, std::vector<int> sport_type_ids);
+
 public:
 
   void aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping);

@@ -25,8 +25,6 @@ private:
 
   static MongoDB* _inst;
 
-  template <class T>
-  static bsoncxx::builder::basic::array vector_to_array(std::vector<T> vec);
   static bsoncxx::types::b_date time_t_to_b_date(time_t time);
 
 public:
@@ -42,6 +40,9 @@ public:
       delete MongoDB::_inst;
     }
   }
+  
+  template <class T>
+  static bsoncxx::builder::basic::array vector_to_array(std::vector<T> vec);
   
   mongocxx::collection collection(std::string name);
 
