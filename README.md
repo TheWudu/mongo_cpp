@@ -9,25 +9,39 @@ exported recently and had that data in my hands when starting this.
 
 # Current functionality 
 
-* Import weights from runtastic export into mongodb (files have to be placed at "data/Weights")
-* Import sport-sessions from runtastic export into mongodb (at "data/Sport-sessions")
-* Import sessions from garmin csv export (constraint: language: en, number format: 1,234.56)
-* Import sessions from gpx files (at "data/gpx")
-* Find/Read those documents and convert to models
-* Check for existance of documents
-* Aggregations to calculate some statistics
-* Simple menu for selecting some actions
-* List sessions, filter by from and to date, default to 30 days ago and now.
-* Allow command line usage (ls, show, stats..)
-* Delete a single session
-* Delete many (with e.g. start/end-time range)
-* Usage output (`./run help` and `./run help <cmd>`)
-* Elevation refinement using SRTM3
-* Timezone calculation for GPX parser (via lat/lng and geonames)
+* Weights
+    * Import weights from runtastic export into mongodb (files have to be placed at "data/Weights")
+
+* Sessions
+    * Import sport-sessions from runtastic export into mongodb (at "data/Sport-sessions")
+    * Import sessions from garmin csv export (constraint: language: en, number format: 1,234.56)
+    * Import sessions from gpx files (at "data/gpx")
+    * Find/Read those documents
+    * Check for existance of documents
+    * List sessions, filter by from and to date, default to 30 days ago and now.
+    * Delete a single session
+    * Delete many (with e.g. start/end-time range)
+
+* Calculations
+    * Elevation refinement using SRTM3
+    * Timezone calculation for GPX parser (via lat/lng and geonames)
+
+* Statistics
+    * Calculate track based stats (overall_distance, average_pace,...)
+    * Distance, ElevationGain, Duration per year graphs
+    * Sessions per weekday
+    * Sessions per hour of day
+    * Distance Buckets statistics
+
+* Other
+    * Simple menu for selecting some actions
+    * Allow command line usage (ls, show, stats..)
+    * Usage output (`./run help` and `./run help <cmd>`)
 
 ## Next ideas
 
 * Edit sessions
+* Pass boundaries for buckets as parameter
 
 ## Setup
 
@@ -59,6 +73,7 @@ points.
 SRTM3 hgt files Can be downloaded there:
 
 http://lic2.apemap.at/touren/hgt3/
+
 https://e4ftl01.cr.usgs.gov/MEASURES/SRTMGL3.003/2000.02.11/index.html
 
 ## Geonames parsing
@@ -71,7 +86,9 @@ You can also import cities to mongodb using the cities_import with the -file
 argument. The cities files can be downloaded there:
 
 http://download.geonames.org/export/dump/
+
 http://download.geonames.org/export/dump/cities500.zip
+
 http://download.geonames.org/export/dump/cities1000.zip
 
 It is recommended to import the cities to mongo:
