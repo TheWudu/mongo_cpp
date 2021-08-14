@@ -289,7 +289,7 @@ void Statistics::aggregate_bucket_by_distance(std::vector<int> years, std::vecto
     uint32_t lower_bound = doc["_id"].get_int32().value;
     for(auto p = boundaries.begin(); p != boundaries.end(); p++) {
       if(*p == (int)lower_bound) {
-        upper_bound = *(++p) - 1;
+        upper_bound = *(++p);
       }
     }
 

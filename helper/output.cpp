@@ -92,9 +92,10 @@ void Output::print_track_based_stats(mongocxx::v_noabi::cursor& cursor, std::vec
 }
   
 void Output::print_buckets(std::vector<DistanceBucket> const & buckets) {
+  std::cout << "Distance buckets: " << std::endl << std::endl;
   for(auto bucket : buckets) {
-    std::string upper = std::to_string(bucket.upper_bound);
-    if(bucket.upper_bound == std::numeric_limits<int>::max() - 1 ) {
+    std::string upper = std::to_string(bucket.upper_bound - 1);
+    if(bucket.upper_bound == std::numeric_limits<int>::max() ) {
       upper = "∞";
     }
       
