@@ -93,7 +93,12 @@ void Output::print_track_based_stats(mongocxx::v_noabi::cursor& cursor, std::vec
   
 void Output::print_buckets(std::vector<DistanceBucket> const & buckets) {
   for(auto bucket : buckets) {
-    std::cout << "Bucket: " << bucket.bound << ": (#" << bucket.total << ")" << std::endl
+    std::string upper = std::to_string(bucket.upper_bound);
+    if(bucket.upper_bound == std::numeric_limits<int>::max() - 1 ) {
+      upper = "∞";
+    }
+      
+    std::cout << "Bucket: " << bucket.lower_bound << " to " << upper << ", (#" << bucket.total << ")" << std::endl
       << "  Average Distance: " << bucket.avg_dist / 1000.0 << " [km]" << std::endl
       << "  Overall Distance: " << bucket.sum_dist / 1000.0 << " [km]" << std::endl
       << "  Overall Duration: " << Helper::TimeConverter::ms_to_min_str(bucket.sum_dur) << std::endl

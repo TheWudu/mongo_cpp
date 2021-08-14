@@ -264,7 +264,7 @@ void Statistics::aggregate_bucket_by_distance(std::vector<int> years, std::vecto
   MongoDB::sport_type_matcher(matcher, sport_type_ids);
   MongoDB::year_matcher(matcher, years);
 
-  std::vector<int> boundaries { 0, 5000, 10000, 20000, 50000, 100000 };
+  std::vector<int> boundaries { 0, 5000, 10000, 20000, std::numeric_limits<int>::max() };
 
   p.match(matcher.view());
   p.bucket(make_document(
@@ -283,16 +283,23 @@ void Statistics::aggregate_bucket_by_distance(std::vector<int> years, std::vecto
   std::vector<DistanceBucket> buckets;
   
   for(auto doc : cursor) {
-    //std::cout << bsoncxx::to_json(doc) << std::endl;
+    // std::cout << bsoncxx::to_json(doc) << std::endl;
 
-    uint32_t bound = doc["_id"].get_int32().value;
+    uint32_t upper_bound = 0;
+    uint32_t lower_bound = doc["_id"].get_int32().value;
+    for(auto p = boundaries.begin(); p != boundaries.end(); p++) {
+      if(*p == (int)lower_bound) {
+        upper_bound = *(++p) - 1;
+      }
+    }
 
     DistanceBucket bucket;
-    bucket.bound    = doc["_id"].get_int32().value;
-    bucket.total    = doc["total"].get_int32().value;
-    bucket.avg_dist = std::round(doc["avg_distance"].get_double().value);
-    bucket.sum_dist = doc["sum_distance"].get_int32().value;
-    bucket.sum_dur  = doc["sum_duration"].get_int32().value;
+    bucket.lower_bound = lower_bound;
+    bucket.upper_bound = upper_bound;
+    bucket.total       = doc["total"].get_int32().value;
+    bucket.avg_dist    = std::round(doc["avg_distance"].get_double().value);
+    bucket.sum_dist    = doc["sum_distance"].get_int32().value;
+    bucket.sum_dur     = doc["sum_duration"].get_int32().value;
 
     buckets.push_back(bucket);
   }
