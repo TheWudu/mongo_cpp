@@ -80,6 +80,7 @@ void show_help_stats() {
             << "  -year=YYYY[,YYYY]       e.g. 2021,2020 or all       default: this year. \n"
             << "  -sport_type=type[,type] e.g. running,cycling or all default: running. \n"
             << "  -group=x,y              e.g. year,month,sport_type_id, default: year,sport_type_id \n"
+            << "  -boundaries=x,y,z       e.g. 5000,20000,100000, default: 0,5000,10000,20000 \n"
             << std::endl;
 }
 

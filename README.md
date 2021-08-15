@@ -41,7 +41,6 @@ exported recently and had that data in my hands when starting this.
 ## Next ideas
 
 * Edit sessions
-* Pass boundaries for buckets as parameter
 
 ## Setup
 

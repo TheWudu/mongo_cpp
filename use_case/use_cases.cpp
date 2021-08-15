@@ -167,6 +167,7 @@ void show_statistics(std::map<std::string, std::string> const args) {
   std::vector<int> years;
   std::vector<int> sport_type_ids;
   std::vector<std::string> grouping;
+  std::vector<int> boundaries;
   
   try { 
     grouping = arg_to_str_vec(args,"-group");
@@ -201,5 +202,17 @@ void show_statistics(std::map<std::string, std::string> const args) {
     sport_type_ids.push_back(1); // running
   }
 
-  statistics.aggregate_stats(years, sport_type_ids, grouping);
+  try {
+    std::vector<std::string> strs;
+
+    boost::split(strs, args.at("-boundaries"), boost::is_any_of(","));
+    for(auto s : strs) {
+      boundaries.push_back(std::stoi(s));
+    }
+  }
+  catch (std::out_of_range&) {
+    boundaries = std::vector { 0, 5000, 10000, 20000 };
+  }
+
+  statistics.aggregate_stats(years, sport_type_ids, grouping, boundaries);
 }

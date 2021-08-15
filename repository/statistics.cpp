@@ -36,13 +36,14 @@ using bsoncxx::builder::stream::open_document;
 
 #include "statistics.hpp"
 
-void Statistics::aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
+void Statistics::aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids, 
+                                 std::vector<std::string> grouping, std::vector<int> boundaries) {
 
   aggregate_basic_statistics(years, sport_type_ids, grouping);
   aggregate_years(years, sport_type_ids);
   aggregate_weekdays(years, sport_type_ids);
   aggregate_hour_of_day(years, sport_type_ids);
-  aggregate_bucket_by_distance(years, sport_type_ids);
+  aggregate_bucket_by_distance(years, sport_type_ids, boundaries);
 }
 
 /* 
@@ -255,7 +256,7 @@ void Statistics::aggregate_hour_of_day(std::vector<int> years, std::vector<int> 
     }
   ])
 */
-void Statistics::aggregate_bucket_by_distance(std::vector<int> years, std::vector<int> sport_type_ids) {
+void Statistics::aggregate_bucket_by_distance(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<int> boundaries) {
   using namespace bsoncxx::builder::basic;
 
   mongocxx::pipeline p{};
@@ -264,7 +265,13 @@ void Statistics::aggregate_bucket_by_distance(std::vector<int> years, std::vecto
   MongoDB::sport_type_matcher(matcher, sport_type_ids);
   MongoDB::year_matcher(matcher, years);
 
-  std::vector<int> boundaries { 0, 5000, 10000, 20000, std::numeric_limits<int>::max() };
+  // std::vector<int> boundaries { 0, 5000, 10000, 20000, std::numeric_limits<int>::max() };
+  if(boundaries.front() != 0) {
+    boundaries.insert(boundaries.begin(),0);
+  }
+  if(boundaries.back() < std::numeric_limits<int>::max()) {
+    boundaries.push_back(std::numeric_limits<int>::max());
+  }
 
   p.match(matcher.view());
   p.bucket(make_document(
