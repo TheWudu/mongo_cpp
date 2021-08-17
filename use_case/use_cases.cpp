@@ -38,7 +38,7 @@ void import_cities(std::map<std::string, std::string> const args) {
 }
 
 void delete_sessions(std::map<std::string, std::string> const args) {
-  Sessions mc; 
+  MongoDB::Sessions mc; 
   std::string id;
   time_t from; 
   time_t to;
@@ -73,7 +73,7 @@ void delete_sessions(std::map<std::string, std::string> const args) {
 
 
 void list_sessions(std::map<std::string, std::string> const args) {
-  Sessions mc;
+  MongoDB::Sessions mc;
   time_t from; 
   time_t to;
   std::vector<int> sport_type_ids;

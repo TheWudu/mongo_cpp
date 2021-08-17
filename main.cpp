@@ -12,7 +12,6 @@
 #include "use_case/use_cases.hpp"
 #include "parser/geonames_parser.hpp"
 
-#include "repository/mongo_db.hpp"
 
 
 void parse_args(int argc, char* argv[], std::map<std::string, std::string>& args) {

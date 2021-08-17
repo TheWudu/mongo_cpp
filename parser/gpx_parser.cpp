@@ -106,7 +106,7 @@ Models::Session* GpxParser::build_model() {
 
   Models::Session* session = new Models::Session;
 
-  session->id             = MongoDB::new_object_id();
+  session->id             = MongoDB::Base::new_object_id();
   session->sport_type_id  = Helper::SportType::id(this->type); 
   session->distance       = (uint32_t)(this->distance);
   session->duration       = this->duration;

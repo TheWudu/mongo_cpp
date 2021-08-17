@@ -34,12 +34,12 @@ using bsoncxx::builder::stream::open_document;
 
 #include "sessions.hpp"
 
-mongocxx::collection Sessions::collection() {
+mongocxx::collection MongoDB::Sessions::collection() {
   MongoConnection* mc = MongoConnection::connection();
   return mc->collection("sessions");
 }
 
-void Sessions::insert(Models::Session rs) {
+void MongoDB::Sessions::insert(Models::Session rs) {
   auto builder = bsoncxx::builder::stream::document{};
 
   auto doc_value = builder
@@ -64,7 +64,7 @@ void Sessions::insert(Models::Session rs) {
   bsoncxx::stdx::optional<mongocxx::result::insert_one> result = collection().insert_one(doc.view());
 }
 
-bool Sessions::find(std::string id, Models::Session* rs) {
+bool MongoDB::Sessions::find(std::string id, Models::Session* rs) {
   bsoncxx::document::value query = document{} 
     << "id"   << id
     << bsoncxx::builder::stream::finalize;
@@ -82,7 +82,7 @@ bool Sessions::find(std::string id, Models::Session* rs) {
 }
 
 
-bool Sessions::exists(time_t start_time, int sport_type_id) {
+bool MongoDB::Sessions::exists(time_t start_time, int sport_type_id) {
   bsoncxx::document::value query = document{} 
     << "start_time"   << open_document 
       << "$gte" << time_t_to_b_date(start_time - 60)
@@ -99,7 +99,7 @@ bool Sessions::exists(time_t start_time, int sport_type_id) {
   return false;
 }
 
-bool Sessions::exists(std::string id) {
+bool MongoDB::Sessions::exists(std::string id) {
   bsoncxx::document::value query = document{} 
     << "id"   << id
     << bsoncxx::builder::stream::finalize;
@@ -112,7 +112,7 @@ bool Sessions::exists(std::string id) {
   return false;
 }
 
-void Sessions::build_session(bsoncxx::v_noabi::document::view data, Models::Session* session) {
+void MongoDB::Sessions::build_session(bsoncxx::v_noabi::document::view data, Models::Session* session) {
   session->id = data["id"].get_utf8().value.to_string();
   int64_t ms  = (data["start_time"].get_date().value).count();
   session->start_time =  ms / 1000;
@@ -132,7 +132,7 @@ void Sessions::build_session(bsoncxx::v_noabi::document::view data, Models::Sess
   session->sport_type_id  = data["sport_type_id"].get_int32().value;
 }
 
-void Sessions::list(time_t from, time_t to, std::vector<int> sport_type_ids, std::string notes) {
+void MongoDB::Sessions::list(time_t from, time_t to, std::vector<int> sport_type_ids, std::string notes) {
   auto matcher = bsoncxx::builder::stream::document{};
   matcher << "start_time"   << open_document 
       << "$gte" << time_t_to_b_date(from)
@@ -165,7 +165,7 @@ void Sessions::list(time_t from, time_t to, std::vector<int> sport_type_ids, std
   Output::print_session_list(sessions);
 }
 
-bool Sessions::delete_one(std::string id) {
+bool MongoDB::Sessions::delete_one(std::string id) {
   bsoncxx::document::value query = document{} 
     << "id"   << id
     << bsoncxx::builder::stream::finalize;
@@ -180,7 +180,7 @@ bool Sessions::delete_one(std::string id) {
   }
 }
 
-uint32_t Sessions::delete_many(time_t const from, time_t const to) {
+uint32_t MongoDB::Sessions::delete_many(time_t const from, time_t const to) {
   bsoncxx::document::value query = document{} 
     << "start_time" << open_document 
       << "$gte" << time_t_to_b_date(from)

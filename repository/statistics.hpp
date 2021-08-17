@@ -8,7 +8,7 @@
 
 #include "../models/weight.hpp"    
 #include "../models/session.hpp"
-#include "mongo_db.hpp"
+#include "base.hpp"
 
 class Statistics {
 

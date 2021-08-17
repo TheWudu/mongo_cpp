@@ -8,7 +8,6 @@
 
 
 #include "../ext/json.hpp"
-#include "../repository/mongo_db.hpp"
 #include "../repository/sessions.hpp"
 #include "../helper/file_list.hpp"
 #include "../parser/json_parser.hpp"
@@ -73,7 +72,7 @@ void UseCase::SessionImport::read_garmin_csv() {
       dist.erase(remove(dist.begin(), dist.end(), '"'), dist.end());
 
       Models::Session* rs = new Models::Session;
-      rs->id             = MongoDB::new_object_id();
+      rs->id             = MongoDB::Base::new_object_id();
       rs->sport_type_id  = Helper::SportType::id(strings[0]); 
       rs->distance       = std::stof(dist) * 1000;
       rs->duration       = Helper::TimeConverter::time_str_to_ms(strings[6]);
@@ -136,15 +135,15 @@ void UseCase::SessionImport::read_runtastic_files() {
 }
 
 void UseCase::SessionImport::store_to_mongo() {
-  Sessions mc;
+  MongoDB::Sessions sessions;
   std::string collection("sessions");
   int icnt = 0;
   int fcnt = 0;
 
   // for(auto rs = this->data.begin(); rs != this->data.end(); rs++) {
   for(auto rs : data) {
-    if (mc.exists(rs->start_time, rs->sport_type_id) == false) {
-       mc.insert(*rs);
+    if (sessions.exists(rs->start_time, rs->sport_type_id) == false) {
+       sessions.insert(*rs);
       icnt++;
     } else {
       fcnt++;

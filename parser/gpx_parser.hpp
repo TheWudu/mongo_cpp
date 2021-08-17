@@ -10,7 +10,7 @@
 #include "../helper/sport_types.hpp"
 #include "../helper/time_converter.hpp"
 #include "../models/session.hpp"
-#include "../repository/mongo_db.hpp"
+#include "../repository/base.hpp"
 
 
 enum gpx_tags {

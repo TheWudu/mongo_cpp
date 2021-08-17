@@ -1,7 +1,7 @@
 #include "weight_import.hpp"
 
 #include "../ext/json.hpp"
-#include "../repository/mongo_db.hpp"
+#include "../repository/weights.hpp"
 #include "../helper/file_list.hpp"
 #include "../parser/json_parser.hpp"
 
@@ -43,12 +43,12 @@ void UseCase::WeightImport::read_files() {
 }
 
 void UseCase::WeightImport::store_to_mongo() {
-  MongoDB mc;
+  MongoDB::Weights mc;
   int icnt = 0;
   int fcnt = 0;
 
   for(auto weight = this->weight_data.begin(); weight != this->weight_data.end(); weight++) {
-    if (mc.exists("weights", weight->id) == false) {
+    if (mc.exists(weight->id) == false) {
       mc.insert(*weight);
       icnt++;
     } else {

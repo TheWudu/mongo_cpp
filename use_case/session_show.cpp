@@ -6,8 +6,8 @@
 void UseCase::SessionShow::find(std::string id) {
   Models::Session rs;
 
-  Sessions mc;
-  if(mc.find(id, &rs)) {
+  MongoDB::Sessions sessions;
+  if(sessions.find(id, &rs)) {
     rs.print();
   }
 }
