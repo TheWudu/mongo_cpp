@@ -1,13 +1,13 @@
 #include "session_show.hpp"
 
 #include "../models/session.hpp"
-#include "../repository/mongo_db.hpp"
+#include "../repository/sessions.hpp"
 
 void UseCase::SessionShow::find(std::string id) {
   Models::Session rs;
 
-  MongoDB* mc = MongoDB::connection();
-  if(mc->find(id, &rs)) {
+  Sessions mc;
+  if(mc.find(id, &rs)) {
     rs.print();
   }
 }

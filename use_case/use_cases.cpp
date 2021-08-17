@@ -2,7 +2,7 @@
 #include <string>
 #include <boost/algorithm/string.hpp>
 
-#include "../repository/mongo_db.hpp"
+#include "../repository/sessions.hpp"
 #include "../repository/statistics.hpp"
 #include "../helper/time_converter.hpp"
 #include "../helper/sport_types.hpp"
@@ -38,7 +38,7 @@ void import_cities(std::map<std::string, std::string> const args) {
 }
 
 void delete_sessions(std::map<std::string, std::string> const args) {
-  MongoDB* mc = MongoDB::connection();
+  Sessions mc; 
   std::string id;
   time_t from; 
   time_t to;
@@ -48,7 +48,7 @@ void delete_sessions(std::map<std::string, std::string> const args) {
   
     std::cout << "Deleting id " << id << " ...";
   
-    if(mc->delete_one(id)) {
+    if(mc.delete_one(id)) {
       std::cout << " [DONE]" << std::endl;
     }
     else {
@@ -64,7 +64,7 @@ void delete_sessions(std::map<std::string, std::string> const args) {
 
     std::cout << "Deleting from: " << args.at("-from") << " to " << args.at("-to") << std::endl;
 
-    auto cnt = mc->delete_many(from, to);
+    auto cnt = mc.delete_many(from, to);
     std::cout << ".. deleted: " << cnt << " sessions" << std::endl;
   }
   catch (std::out_of_range&) {
@@ -73,7 +73,7 @@ void delete_sessions(std::map<std::string, std::string> const args) {
 
 
 void list_sessions(std::map<std::string, std::string> const args) {
-  MongoDB* mc = MongoDB::connection();
+  Sessions mc;
   time_t from; 
   time_t to;
   std::vector<int> sport_type_ids;
@@ -118,7 +118,7 @@ void list_sessions(std::map<std::string, std::string> const args) {
             << "         to:   " << ctime(&to) 
             << std::endl;
 
-  mc->list_sessions(from, to, sport_type_ids, notes);
+  mc.list(from, to, sport_type_ids, notes);
 }
 
 void show_session(std::map<std::string, std::string> const args) {

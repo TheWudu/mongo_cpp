@@ -34,10 +34,9 @@ using bsoncxx::builder::stream::open_document;
 
 #include "mongo_db.hpp"
 
-MongoDB* MongoDB::_inst = 0;
-
 mongocxx::collection MongoDB::collection(std::string name) {
-  return db[name];
+  MongoConnection* mc = MongoConnection::connection();
+  return mc->collection(name);
 }
 
 void MongoDB::print_collection(std::string name) {
@@ -195,32 +194,6 @@ std::string MongoDB::new_object_id() {
   return oid.to_string();
 }
 
-void MongoDB::insert(Models::Session rs) {
-  auto builder = bsoncxx::builder::stream::document{};
-
-  auto doc_value = builder
-    << "id"   << rs.id
-    << "year" << gmtime(&rs.start_time)->tm_year + 1900
-    << "month" << gmtime(&rs.start_time)->tm_mon + 1
-    << "start_time" << time_t_to_b_date(rs.start_time)
-    << "end_time" << time_t_to_b_date(rs.end_time)
-    << "start_time_timezone_offset" << rs.start_time_timezone_offset
-    << "distance" << rs.distance
-    << "duration" << rs.duration
-    << "pause" << rs.pause
-    << "elevation_gain" << rs.elevation_gain
-    << "elevation_loss" << rs.elevation_loss
-    << "sport_type_id" << rs.sport_type_id;
-  
-  if(rs.notes.size() > 0) {
-    doc_value << "notes" << rs.notes;
-  }
-  auto doc = doc_value << bsoncxx::builder::stream::finalize;
-
-  auto coll = collection("sessions");
-  bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(doc.view());
-}
-
 bool MongoDB::find(std::string id, Models::Weight* weight) {
   bsoncxx::document::value query = document{} 
     << "id"   << id
@@ -242,44 +215,6 @@ bool MongoDB::find(std::string id, Models::Weight* weight) {
     *weight = Models::Weight(i, t, w);
     return true;
   }
-}
-
-bool MongoDB::find(std::string id, Models::Session* rs) {
-  bsoncxx::document::value query = document{} 
-    << "id"   << id
-    << bsoncxx::builder::stream::finalize;
-
-  auto coll = collection("sessions");
-  bsoncxx::stdx::optional<bsoncxx::document::value> result = coll.find_one(query.view());
- 
-  if(!result) { 
-    return false;
-  }
-  else {
-    build_session(result->view(), rs);
-  
-    return true;
-  }
-}
-
-
-bool MongoDB::exists(time_t start_time, int sport_type_id) {
-  bsoncxx::document::value query = document{} 
-    << "start_time"   << open_document 
-      << "$gte" << time_t_to_b_date(start_time - 60)
-      << "$lte" << time_t_to_b_date(start_time + 60)
-      << close_document
-    << "sport_type_id" << sport_type_id 
-    << bsoncxx::builder::stream::finalize;
-  
-  auto coll = collection("sessions");
-
-  int64_t count = coll.count_documents(query.view());
- 
-  if(count == 1) { 
-    return true;
-  }
-  return false;
 }
 
 bool MongoDB::exists(std::string colname, std::string id) {
@@ -316,59 +251,6 @@ bool MongoDB::city_exist(double lat, double lng) {
   return false;
 }
 
-void MongoDB::build_session(bsoncxx::v_noabi::document::view data, Models::Session* session) {
-  session->id = data["id"].get_utf8().value.to_string();
-  int64_t ms  = (data["start_time"].get_date().value).count();
-  session->start_time =  ms / 1000;
-  ms = (data["end_time"].get_date().value).count();
-  session->end_time       =  ms / 1000;
-  session->distance       = data["distance"].get_int32().value;
-  session->duration       = data["duration"].get_int32().value;
-  if(data["pause"]) {
-    session->pause          = data["pause"].get_int32().value;
-  }
-  session->elevation_gain = data["elevation_gain"].get_int32().value;
-  session->elevation_loss = data["elevation_loss"].get_int32().value;
-  if(data["notes"]) {
-    session->notes        = data["notes"].get_utf8().value.to_string();
-  }
-  session->sport_type_id  = data["sport_type_id"].get_int32().value;
-}
-
-void MongoDB::list_sessions(time_t from, time_t to, std::vector<int> sport_type_ids, std::string notes) {
-  auto matcher = bsoncxx::builder::stream::document{};
-  matcher << "start_time"   << open_document 
-      << "$gte" << time_t_to_b_date(from)
-      << "$lte" << time_t_to_b_date(to)
-      << close_document;
-  sport_type_matcher(matcher, sport_type_ids);
-  
-  if(notes.size() > 0) {
-    matcher << "notes" << bsoncxx::types::b_regex{notes}; 
-  }
-  auto query = matcher << bsoncxx::builder::stream::finalize;
-
-  auto order = bsoncxx::builder::stream::document{} 
-    << "start_time" << 1 
-    << bsoncxx::builder::stream::finalize;
-
-  auto opts = mongocxx::options::find{};
-  opts.sort(order.view());
-
-  auto coll = collection("sessions");
-  mongocxx::cursor cursor = coll.find(query.view(), opts);
-
-  std::vector<Models::Session> sessions;
-  
-  for(auto doc : cursor) {
-    Models::Session rs;
-    build_session(doc, &rs);
-    sessions.push_back(rs);
-  }
-
-  Output::print_session_list(sessions);
-}
-
 template <class T>
 bsoncxx::builder::basic::array MongoDB::vector_to_array(std::vector<T> vec) {
   bsoncxx::builder::basic::array a = bsoncxx::builder::basic::array();
@@ -393,37 +275,3 @@ void MongoDB::year_matcher(bsoncxx::builder::stream::document& matcher, std::vec
   }
 }
  
-bool MongoDB::delete_one(std::string id) {
-  bsoncxx::document::value query = document{} 
-    << "id"   << id
-    << bsoncxx::builder::stream::finalize;
-
-  auto coll = collection("sessions");
-  auto result = coll.delete_one(query.view());
- 
-  if(!result) { 
-    return false;
-  }
-  else {
-    return (result->deleted_count() == 1);
-  }
-}
-
-uint32_t MongoDB::delete_many(time_t const from, time_t const to) {
-  bsoncxx::document::value query = document{} 
-    << "start_time" << open_document 
-      << "$gte" << time_t_to_b_date(from)
-      << "$lte" << time_t_to_b_date(to)
-      << close_document
-    << bsoncxx::builder::stream::finalize;
-
-  auto coll = collection("sessions");
-  auto result = coll.delete_many(query.view());
- 
-  if(!result) { 
-    return 0;
-  }
-  else {
-    return result->deleted_count();
-  }
-}

@@ -87,8 +87,8 @@ void Statistics::aggregate_basic_statistics(std::vector<int> years, std::vector<
   ));
   p.sort(sorter.view());
   
-  MongoDB* mc = MongoDB::connection();
-  auto cursor = mc->collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+  MongoDB mc;
+  auto cursor = mc.collection("sessions").aggregate(p, mongocxx::options::aggregate{});
 
   Output::print_track_based_stats(cursor, grouping); 
 }
@@ -111,8 +111,8 @@ void Statistics::aggregate_years(std::vector<int> years, std::vector<int> sport_
           ));
   p.sort(make_document(kvp("_id", 1)));
 
-  MongoDB* mc = MongoDB::connection();
-  auto cursor = mc->collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+  MongoDB mc;
+  auto cursor = mc.collection("sessions").aggregate(p, mongocxx::options::aggregate{});
 
   std::vector<std::string> attrs = std::vector { 
     std::string("overall_distance"), 
@@ -187,8 +187,8 @@ void Statistics::aggregate_weekdays(std::vector<int> years, std::vector<int> spo
           ));
   p.sort(make_document(kvp("_id", 1)));
 
-  MongoDB* mc = MongoDB::connection();
-  auto cursor = mc->collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+  MongoDB mc; 
+  auto cursor = mc.collection("sessions").aggregate(p, mongocxx::options::aggregate{});
 
   auto dayvec = build_day_vector(cursor);
 
@@ -233,8 +233,8 @@ void Statistics::aggregate_hour_of_day(std::vector<int> years, std::vector<int> 
           ));
   p.sort(make_document(kvp("_id", 1)));
 
-  MongoDB* mc = MongoDB::connection();
-  auto cursor = mc->collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+  MongoDB mc;
+  auto cursor = mc.collection("sessions").aggregate(p, mongocxx::options::aggregate{});
   auto hourvec = build_hour_vector(cursor);
 
   Output::print_vector("Sessions per hour of day", hourvec);
@@ -284,8 +284,8 @@ void Statistics::aggregate_bucket_by_distance(std::vector<int> years, std::vecto
       kvp("sum_duration", make_document(kvp("$sum", "$duration")))
     ))));
 
-  MongoDB* mc = MongoDB::connection();
-  auto cursor = mc->collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+  MongoDB mc;
+  auto cursor = mc.collection("sessions").aggregate(p, mongocxx::options::aggregate{});
 
   std::vector<DistanceBucket> buckets;
   

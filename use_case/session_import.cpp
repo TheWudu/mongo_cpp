@@ -9,6 +9,7 @@
 
 #include "../ext/json.hpp"
 #include "../repository/mongo_db.hpp"
+#include "../repository/sessions.hpp"
 #include "../helper/file_list.hpp"
 #include "../parser/json_parser.hpp"
 #include "../parser/gpx_parser.hpp"
@@ -135,15 +136,15 @@ void UseCase::SessionImport::read_runtastic_files() {
 }
 
 void UseCase::SessionImport::store_to_mongo() {
-  MongoDB* mc = MongoDB::connection();
+  Sessions mc;
   std::string collection("sessions");
   int icnt = 0;
   int fcnt = 0;
 
   // for(auto rs = this->data.begin(); rs != this->data.end(); rs++) {
   for(auto rs : data) {
-    if (mc->exists(rs->start_time, rs->sport_type_id) == false) {
-       mc->insert(*rs);
+    if (mc.exists(rs->start_time, rs->sport_type_id) == false) {
+       mc.insert(*rs);
       icnt++;
     } else {
       fcnt++;

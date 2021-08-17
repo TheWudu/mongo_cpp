@@ -43,13 +43,13 @@ void UseCase::WeightImport::read_files() {
 }
 
 void UseCase::WeightImport::store_to_mongo() {
-  MongoDB* mc = MongoDB::connection();
+  MongoDB mc;
   int icnt = 0;
   int fcnt = 0;
 
   for(auto weight = this->weight_data.begin(); weight != this->weight_data.end(); weight++) {
-    if (mc->exists("weights", weight->id) == false) {
-      mc->insert(*weight);
+    if (mc.exists("weights", weight->id) == false) {
+      mc.insert(*weight);
       icnt++;
     } else {
       fcnt++;

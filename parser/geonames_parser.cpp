@@ -13,8 +13,8 @@ GeonamesParser* GeonamesParser::_inst = nullptr;
 std::string GeonamesParser::timezone_for(double const lat, double const lng) {
 
   Models::City city;
-  MongoDB* mc = MongoDB::connection();
-  if(mc->find_nearest_city(lat, lng, &city)) {
+  MongoDB mc;
+  if(mc.find_nearest_city(lat, lng, &city)) {
     return city.timezone;
   }
   else {
@@ -84,7 +84,7 @@ void GeonamesParser::parse_file(std::string const filename) {
 }
 
 void GeonamesParser::store_to_mongo() {
-  MongoDB* mc = MongoDB::connection();
+  MongoDB mc;
   int icnt = 0;
   int fcnt = 0;
   if(cities.size() == 0) {
@@ -93,8 +93,8 @@ std::cout << "store to mongo parse file" << std::endl;
   }
   
   std::cout << "Creating Indexes ... " << std::endl;
-  mc->create_geo_index();
-  mc->create_location_index();
+  mc.create_geo_index();
+  mc.create_location_index();
   
   std::cout << " [DONE]" << std::endl;
 
@@ -105,9 +105,9 @@ std::cout << "store to mongo parse file" << std::endl;
   Models::City cx;
   for(Models::City* c : cities) {
     // if(!mc->find_nearest_city(c->lat, c->lng, &cx, 1000)) {
-    if(!mc->city_exist(c->lat, c->lng)) {
+    if(!mc.city_exist(c->lat, c->lng)) {
       // std::cout << std::endl << "inserting" << c->name << ", " << c->lat << ", " << c->lng << std::endl;
-      mc->insert(*c);    
+      mc.insert(*c);    
       icnt++;
     }
     else {
