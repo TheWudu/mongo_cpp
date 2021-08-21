@@ -35,8 +35,7 @@ using bsoncxx::builder::stream::open_document;
 #include "cities.hpp"
 
 mongocxx::collection MongoDB::Cities::collection() {
-  MongoConnection* mc = MongoConnection::connection();
-  return mc->collection("cities");
+  return Base::collection("cities");
 }
 
 void MongoDB::Cities::insert(Models::City& city) {

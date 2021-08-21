@@ -8,7 +8,7 @@
 
 
 #include "../ext/json.hpp"
-#include "../repository/sessions.hpp"
+#include "../mongo_db/sessions.hpp"
 #include "../helper/file_list.hpp"
 #include "../parser/json_parser.hpp"
 #include "../parser/gpx_parser.hpp"

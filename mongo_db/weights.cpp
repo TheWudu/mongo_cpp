@@ -35,8 +35,7 @@ using bsoncxx::builder::stream::open_document;
 #include "weights.hpp"
 
 mongocxx::collection MongoDB::Weights::collection() {
-  MongoConnection* mc = MongoConnection::connection();
-  return mc->collection("weights");
+  return Base::collection("weights");
 }
 
 void MongoDB::Weights::insert(Models::Weight weight) {

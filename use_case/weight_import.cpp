@@ -1,7 +1,7 @@
 #include "weight_import.hpp"
 
 #include "../ext/json.hpp"
-#include "../repository/weights.hpp"
+#include "../mongo_db/weights.hpp"
 #include "../helper/file_list.hpp"
 #include "../parser/json_parser.hpp"
 

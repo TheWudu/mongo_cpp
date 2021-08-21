@@ -2,8 +2,8 @@
 #include <string>
 #include <boost/algorithm/string.hpp>
 
-#include "../repository/sessions.hpp"
-#include "../repository/statistics.hpp"
+#include "../mongo_db/sessions.hpp"
+#include "../mongo_db/statistics.hpp"
 #include "../helper/time_converter.hpp"
 #include "../helper/sport_types.hpp"
 #include "../parser/geonames_parser.hpp"
@@ -163,7 +163,7 @@ int current_year() {
 }
 
 void show_statistics(std::map<std::string, std::string> const args) {
-  Statistics statistics = Statistics();
+  MongoDB::Statistics statistics = MongoDB::Statistics();
   std::vector<int> years;
   std::vector<int> sport_type_ids;
   std::vector<std::string> grouping;

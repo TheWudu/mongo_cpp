@@ -3,7 +3,7 @@
 CC        := g++
 LD        := g++
 
-MODULES   := helper parser use_case models repository .
+MODULES   := helper parser use_case models mongo_db .
 SRC_DIR   := $(MODULES) # $(addprefix src/,$(MODULES))
 BUILD_DIR := $(addprefix build/,$(MODULES))
 

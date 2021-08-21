@@ -5,7 +5,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "../helper/geokit.hpp"
-#include "../repository/cities.hpp"
+#include "../mongo_db/cities.hpp"
 #include "geonames_parser.hpp"
 
 GeonamesParser* GeonamesParser::_inst = nullptr;

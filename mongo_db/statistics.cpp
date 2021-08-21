@@ -36,7 +36,7 @@ using bsoncxx::builder::stream::open_document;
 
 #include "statistics.hpp"
 
-void Statistics::aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids, 
+void MongoDB::Statistics::aggregate_stats(std::vector<int> years, std::vector<int> sport_type_ids, 
                                  std::vector<std::string> grouping, std::vector<int> boundaries) {
 
   aggregate_basic_statistics(years, sport_type_ids, grouping);
@@ -46,6 +46,16 @@ void Statistics::aggregate_stats(std::vector<int> years, std::vector<int> sport_
   aggregate_bucket_by_distance(years, sport_type_ids, boundaries);
 }
 
+bsoncxx::builder::stream::document MongoDB::Statistics::base_matcher(std::vector<int> years, std::vector<int> sport_type_ids) {
+  bsoncxx::builder::stream::document matcher;
+  
+  sport_type_matcher(matcher, sport_type_ids);
+  year_matcher(matcher, years);
+
+  return matcher;
+}
+
+
 /* 
   db.sessions.aggregate([ 
     { $match: { "sport_type_id": { $in: [1,3,4,19] }, "start_time": { $gt: ISODate("2021-04-01"), $lt: ISODate("2022-01-01") } } }, 
@@ -53,13 +63,11 @@ void Statistics::aggregate_stats(std::vector<int> years, std::vector<int> sport_
     { $project: { overall_distance: "$overall_distance", overall_duration: "$overall_duration", overall_count: "$overall_count", avg_distance: { $divide: [ "$overall_distance", "$overall_count" ] }, average_pace: { $divide: [ "$overall_duration", "$overall_distance"] } } } 
   ] years
 */
-void Statistics::aggregate_basic_statistics(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
+void MongoDB::Statistics::aggregate_basic_statistics(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
   using namespace bsoncxx::builder::basic;
 
   mongocxx::pipeline p{};
-  auto matcher = bsoncxx::builder::stream::document {};
-  MongoDB::Base::sport_type_matcher(matcher, sport_type_ids);
-  MongoDB::Base::year_matcher(matcher, years);
+  auto matcher = base_matcher(years, sport_type_ids); 
 
   auto group_by = bsoncxx::builder::stream::document {};
   auto sorter   = bsoncxx::builder::stream::document {};
@@ -87,20 +95,17 @@ void Statistics::aggregate_basic_statistics(std::vector<int> years, std::vector<
   ));
   p.sort(sorter.view());
   
-  MongoDB::Base mc;
-  auto cursor = mc.collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+  auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
 
   Output::print_track_based_stats(cursor, grouping); 
 }
 
 
-void Statistics::aggregate_years(std::vector<int> years, std::vector<int> sport_type_ids) {
+void MongoDB::Statistics::aggregate_years(std::vector<int> years, std::vector<int> sport_type_ids) {
   using namespace bsoncxx::builder::basic;
   mongocxx::pipeline p{};
 
-  auto matcher = bsoncxx::builder::stream::document {};
-  MongoDB::Base::sport_type_matcher(matcher, sport_type_ids);
-  MongoDB::Base::year_matcher(matcher, years);
+  auto matcher = base_matcher(years, sport_type_ids);
 
   p.match(matcher.view());
   p.group(make_document(kvp("_id", "$year"), 
@@ -111,8 +116,7 @@ void Statistics::aggregate_years(std::vector<int> years, std::vector<int> sport_
           ));
   p.sort(make_document(kvp("_id", 1)));
 
-  MongoDB::Base mc;
-  auto cursor = mc.collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+  auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
 
   std::vector<std::string> attrs = std::vector { 
     std::string("overall_distance"), 
@@ -126,15 +130,15 @@ void Statistics::aggregate_years(std::vector<int> years, std::vector<int> sport_
   Output::print_vector("Elevation gain per year", vecs.at(2));
 }
 
-bool Statistics::weekday_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
+bool MongoDB::Statistics::weekday_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
   return (Helper::TimeConverter::weekday_to_idx(a.first) < Helper::TimeConverter::weekday_to_idx(b.first)); 
 }
 
-bool Statistics::year_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
+bool MongoDB::Statistics::year_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
   return (std::stoi(a.first) < std::stoi(b.first)); 
 }
 
-std::vector<std::pair<std::string, int>> Statistics::build_day_vector(mongocxx::v_noabi::cursor& cursor) {
+std::vector<std::pair<std::string, int>> MongoDB::Statistics::build_day_vector(mongocxx::v_noabi::cursor& cursor) {
   std::vector<std::pair<std::string, int>> dayvec;
   
   for(auto doc : cursor) {
@@ -148,7 +152,7 @@ std::vector<std::pair<std::string, int>> Statistics::build_day_vector(mongocxx::
   return dayvec;
 }
 
-std::vector<std::vector<std::pair<std::string, int>>> Statistics::build_vectors(mongocxx::v_noabi::cursor& cursor, std::vector<std::string> attrs) {
+std::vector<std::vector<std::pair<std::string, int>>> MongoDB::Statistics::build_vectors(mongocxx::v_noabi::cursor& cursor, std::vector<std::string> attrs) {
   std::vector<std::vector<std::pair<std::string, int>>> vecs (attrs.size());
   
   for(auto doc : cursor) {
@@ -172,13 +176,11 @@ std::vector<std::vector<std::pair<std::string, int>>> Statistics::build_vectors(
     { $group: { _id: "$weekday", cnt: { $sum: 1 } } } 
   ])
 */
-void Statistics::aggregate_weekdays(std::vector<int> years, std::vector<int> sport_type_ids) {
+void MongoDB::Statistics::aggregate_weekdays(std::vector<int> years, std::vector<int> sport_type_ids) {
   using namespace bsoncxx::builder::basic;
   mongocxx::pipeline p{};
 
-  auto matcher = bsoncxx::builder::stream::document {};
-  MongoDB::Base::sport_type_matcher(matcher, sport_type_ids);
-  MongoDB::Base::year_matcher(matcher, years);
+  auto matcher = base_matcher(years, sport_type_ids);
 
   p.match(matcher.view());
   p.add_fields(make_document(kvp("weekday", make_document(kvp("$dayOfWeek", "$start_time")))));
@@ -187,8 +189,7 @@ void Statistics::aggregate_weekdays(std::vector<int> years, std::vector<int> spo
           ));
   p.sort(make_document(kvp("_id", 1)));
 
-  MongoDB::Base mc; 
-  auto cursor = mc.collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+  auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
 
   auto dayvec = build_day_vector(cursor);
 
@@ -196,7 +197,7 @@ void Statistics::aggregate_weekdays(std::vector<int> years, std::vector<int> spo
 }
 
 
-std::vector<std::pair<std::string, int>> Statistics::build_hour_vector(mongocxx::v_noabi::cursor& cursor) {
+std::vector<std::pair<std::string, int>> MongoDB::Statistics::build_hour_vector(mongocxx::v_noabi::cursor& cursor) {
   std::vector<std::pair<std::string, int>> hourvec;
   for(auto doc : cursor) {
     int val = doc["count"].get_int32().value;
@@ -214,14 +215,12 @@ std::vector<std::pair<std::string, int>> Statistics::build_hour_vector(mongocxx:
     { $group: { _id: "$hour", cnt: { $sum: 1 } } } 
   ])
 */
-void Statistics::aggregate_hour_of_day(std::vector<int> years, std::vector<int> sport_type_ids) {
+void MongoDB::Statistics::aggregate_hour_of_day(std::vector<int> years, std::vector<int> sport_type_ids) {
   using namespace bsoncxx::builder::basic;
 
   mongocxx::pipeline p{};
 
-  auto matcher = bsoncxx::builder::stream::document {};
-  MongoDB::Base::sport_type_matcher(matcher, sport_type_ids);
-  MongoDB::Base::year_matcher(matcher, years);
+  auto matcher = base_matcher(years, sport_type_ids); 
 
   p.match(matcher.view());
   p.add_fields(make_document(kvp("hour", 
@@ -233,8 +232,7 @@ void Statistics::aggregate_hour_of_day(std::vector<int> years, std::vector<int> 
           ));
   p.sort(make_document(kvp("_id", 1)));
 
-  MongoDB::Base mc;
-  auto cursor = mc.collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+  auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
   auto hourvec = build_hour_vector(cursor);
 
   Output::print_vector("Sessions per hour of day", hourvec);
@@ -256,15 +254,12 @@ void Statistics::aggregate_hour_of_day(std::vector<int> years, std::vector<int> 
     }
   ])
 */
-void Statistics::aggregate_bucket_by_distance(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<int> boundaries) {
+void MongoDB::Statistics::aggregate_bucket_by_distance(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<int> boundaries) {
   using namespace bsoncxx::builder::basic;
 
   mongocxx::pipeline p{};
 
-  auto matcher = bsoncxx::builder::stream::document {};
-  MongoDB::Base::sport_type_matcher(matcher, sport_type_ids);
-  MongoDB::Base::year_matcher(matcher, years);
-
+  auto matcher = base_matcher(years, sport_type_ids); 
   // std::vector<int> boundaries { 0, 5000, 10000, 20000, std::numeric_limits<int>::max() };
   if(boundaries.front() != 0) {
     boundaries.insert(boundaries.begin(),0);
@@ -284,8 +279,7 @@ void Statistics::aggregate_bucket_by_distance(std::vector<int> years, std::vecto
       kvp("sum_duration", make_document(kvp("$sum", "$duration")))
     ))));
 
-  MongoDB::Base mc;
-  auto cursor = mc.collection("sessions").aggregate(p, mongocxx::options::aggregate{});
+  auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
 
   std::vector<DistanceBucket> buckets;
   
