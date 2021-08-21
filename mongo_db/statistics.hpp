@@ -26,6 +26,7 @@ namespace MongoDB {
     std::vector<std::pair<std::string, int>> build_day_vector(mongocxx::v_noabi::cursor& cursor);
     std::vector<std::pair<std::string, int>> build_hour_vector(mongocxx::v_noabi::cursor& cursor);
     std::vector<std::vector<std::pair<std::string, int>>> build_vectors(mongocxx::v_noabi::cursor& cursor, std::vector<std::string> attrs);
+    std::vector<DistanceBucket> build_distance_buckets_vector(mongocxx::v_noabi::cursor& cursor, std::vector<int> boundaries);
 
     bsoncxx::builder::stream::document base_matcher(std::vector<int> years, std::vector<int> sport_type_ids);
 

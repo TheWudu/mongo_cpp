@@ -46,6 +46,14 @@ void MongoDB::Statistics::aggregate_stats(std::vector<int> years, std::vector<in
   aggregate_bucket_by_distance(years, sport_type_ids, boundaries);
 }
 
+bool MongoDB::Statistics::weekday_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
+  return (Helper::TimeConverter::weekday_to_idx(a.first) < Helper::TimeConverter::weekday_to_idx(b.first)); 
+}
+
+bool MongoDB::Statistics::year_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
+  return (std::stoi(a.first) < std::stoi(b.first)); 
+}
+
 bsoncxx::builder::stream::document MongoDB::Statistics::base_matcher(std::vector<int> years, std::vector<int> sport_type_ids) {
   bsoncxx::builder::stream::document matcher;
   
@@ -54,7 +62,6 @@ bsoncxx::builder::stream::document MongoDB::Statistics::base_matcher(std::vector
 
   return matcher;
 }
-
 
 /* 
   db.sessions.aggregate([ 
@@ -130,44 +137,6 @@ void MongoDB::Statistics::aggregate_years(std::vector<int> years, std::vector<in
   Output::print_vector("Elevation gain per year", vecs.at(2));
 }
 
-bool MongoDB::Statistics::weekday_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
-  return (Helper::TimeConverter::weekday_to_idx(a.first) < Helper::TimeConverter::weekday_to_idx(b.first)); 
-}
-
-bool MongoDB::Statistics::year_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b) {
-  return (std::stoi(a.first) < std::stoi(b.first)); 
-}
-
-std::vector<std::pair<std::string, int>> MongoDB::Statistics::build_day_vector(mongocxx::v_noabi::cursor& cursor) {
-  std::vector<std::pair<std::string, int>> dayvec;
-  
-  for(auto doc : cursor) {
-    int val = doc["count"].get_int32().value;
-
-    std::string dayname = Helper::TimeConverter::mongo_idx_to_weekday_name(doc["_id"].get_int32().value);
-    dayvec.push_back(std::make_pair(dayname, val));
-  }
-  std::sort(dayvec.begin(), dayvec.end(), weekday_sort);
- 
-  return dayvec;
-}
-
-std::vector<std::vector<std::pair<std::string, int>>> MongoDB::Statistics::build_vectors(mongocxx::v_noabi::cursor& cursor, std::vector<std::string> attrs) {
-  std::vector<std::vector<std::pair<std::string, int>>> vecs (attrs.size());
-  
-  for(auto doc : cursor) {
-
-    for(uint32_t i = 0; i < attrs.size(); i++) {
-
-      int val = doc[attrs[i]].get_int32().value;
-
-      std::string name = std::to_string(doc["_id"].get_int32().value);
-      vecs.at(i).push_back(std::make_pair(name, val));
-    }
-  }
- 
-  return vecs;
-}
 
 /*
   db.sessions.aggregate([ 
@@ -194,18 +163,6 @@ void MongoDB::Statistics::aggregate_weekdays(std::vector<int> years, std::vector
   auto dayvec = build_day_vector(cursor);
 
   Output::print_vector("Sessions per weekday", dayvec);
-}
-
-
-std::vector<std::pair<std::string, int>> MongoDB::Statistics::build_hour_vector(mongocxx::v_noabi::cursor& cursor) {
-  std::vector<std::pair<std::string, int>> hourvec;
-  for(auto doc : cursor) {
-    int val = doc["count"].get_int32().value;
-    int hour = doc["_id"].get_int32().value;
-
-    hourvec.push_back(std::make_pair(Helper::TimeConverter::hour_to_time_str(hour), val));
-  }
-  return hourvec;
 }
 
 /*
@@ -260,7 +217,6 @@ void MongoDB::Statistics::aggregate_bucket_by_distance(std::vector<int> years, s
   mongocxx::pipeline p{};
 
   auto matcher = base_matcher(years, sport_type_ids); 
-  // std::vector<int> boundaries { 0, 5000, 10000, 20000, std::numeric_limits<int>::max() };
   if(boundaries.front() != 0) {
     boundaries.insert(boundaries.begin(),0);
   }
@@ -281,11 +237,19 @@ void MongoDB::Statistics::aggregate_bucket_by_distance(std::vector<int> years, s
 
   auto cursor = collection("sessions").aggregate(p, mongocxx::options::aggregate{});
 
-  std::vector<DistanceBucket> buckets;
-  
-  for(auto doc : cursor) {
-    // std::cout << bsoncxx::to_json(doc) << std::endl;
 
+  auto buckets = build_distance_buckets_vector(cursor, boundaries);
+
+  Output::print_buckets(buckets);
+}
+
+/*
+  Vector building methods
+*/
+std::vector<DistanceBucket> MongoDB::Statistics::build_distance_buckets_vector(mongocxx::v_noabi::cursor& cursor, std::vector<int> boundaries) {
+  std::vector<DistanceBucket> buckets;
+
+  for(auto doc : cursor) {
     uint32_t upper_bound = 0;
     uint32_t lower_bound = doc["_id"].get_int32().value;
     for(auto p = boundaries.begin(); p != boundaries.end(); p++) {
@@ -304,6 +268,47 @@ void MongoDB::Statistics::aggregate_bucket_by_distance(std::vector<int> years, s
 
     buckets.push_back(bucket);
   }
+  return buckets;
+}
 
-  Output::print_buckets(buckets);
+std::vector<std::pair<std::string, int>> MongoDB::Statistics::build_hour_vector(mongocxx::v_noabi::cursor& cursor) {
+  std::vector<std::pair<std::string, int>> hourvec;
+  for(auto doc : cursor) {
+    int val = doc["count"].get_int32().value;
+    int hour = doc["_id"].get_int32().value;
+
+    hourvec.push_back(std::make_pair(Helper::TimeConverter::hour_to_time_str(hour), val));
+  }
+  return hourvec;
+}
+
+std::vector<std::pair<std::string, int>> MongoDB::Statistics::build_day_vector(mongocxx::v_noabi::cursor& cursor) {
+  std::vector<std::pair<std::string, int>> dayvec;
+  
+  for(auto doc : cursor) {
+    int val = doc["count"].get_int32().value;
+
+    std::string dayname = Helper::TimeConverter::mongo_idx_to_weekday_name(doc["_id"].get_int32().value);
+    dayvec.push_back(std::make_pair(dayname, val));
+  }
+  std::sort(dayvec.begin(), dayvec.end(), weekday_sort);
+ 
+  return dayvec;
+}
+
+std::vector<std::vector<std::pair<std::string, int>>> MongoDB::Statistics::build_vectors(mongocxx::v_noabi::cursor& cursor, std::vector<std::string> attrs) {
+  std::vector<std::vector<std::pair<std::string, int>>> vecs (attrs.size());
+  
+  for(auto doc : cursor) {
+
+    for(uint32_t i = 0; i < attrs.size(); i++) {
+
+      int val = doc[attrs[i]].get_int32().value;
+
+      std::string name = std::to_string(doc["_id"].get_int32().value);
+      vecs.at(i).push_back(std::make_pair(name, val));
+    }
+  }
+ 
+  return vecs;
 }
