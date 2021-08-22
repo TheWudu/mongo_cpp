@@ -65,10 +65,10 @@ bsoncxx::builder::stream::document MongoDB::Statistics::base_matcher(std::vector
 
 /* 
   db.sessions.aggregate([ 
-    { $match: { "sport_type_id": { $in: [1,3,4,19] }, "start_time": { $gt: ISODate("2021-04-01"), $lt: ISODate("2022-01-01") } } }, 
+    { $match: { "sport_type_id": { $in: [1,3,4,19] }, year: { $in: [2021,2020] } } }, 
     { $group: { _id: "$sport_type_id", overall_distance: { $sum: "$distance" }, overall_duration: { $sum: "$duration" }, overall_count: { $sum: 1 } } }, 
     { $project: { overall_distance: "$overall_distance", overall_duration: "$overall_duration", overall_count: "$overall_count", avg_distance: { $divide: [ "$overall_distance", "$overall_count" ] }, average_pace: { $divide: [ "$overall_duration", "$overall_distance"] } } } 
-  ] years
+  ])
 */
 void MongoDB::Statistics::aggregate_basic_statistics(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
   using namespace bsoncxx::builder::basic;
@@ -108,6 +108,17 @@ void MongoDB::Statistics::aggregate_basic_statistics(std::vector<int> years, std
 }
 
 
+/*
+  db.sessions.aggregate([ 
+    { $match: { year: { $in: [2021] }, sport_type_id: { $in: [1] } } }, 
+    { $group: { _id: "$year", 
+        overall_distance: { $sum: "$distance" },
+        overall_duration: { $sum: "$duration" },
+        overall_elevation_gain: { $sum: "$elevation_gain" },
+        overall_cnt: { $sum: 1 } } },
+    { $sort: { _id: 1 } }
+  ])
+*/
 void MongoDB::Statistics::aggregate_years(std::vector<int> years, std::vector<int> sport_type_ids) {
   using namespace bsoncxx::builder::basic;
   mongocxx::pipeline p{};
@@ -142,7 +153,8 @@ void MongoDB::Statistics::aggregate_years(std::vector<int> years, std::vector<in
   db.sessions.aggregate([ 
     { $match: { year: 2021, month: 7, sport_type_id: 1 } }, 
     { $addFields: { weekday: { $dayOfWeek: "$start_time" } } }, 
-    { $group: { _id: "$weekday", cnt: { $sum: 1 } } } 
+    { $group: { _id: "$weekday", cnt: { $sum: 1 } } },
+    { $sort: { _id: 1 } }
   ])
 */
 void MongoDB::Statistics::aggregate_weekdays(std::vector<int> years, std::vector<int> sport_type_ids) {
@@ -167,9 +179,10 @@ void MongoDB::Statistics::aggregate_weekdays(std::vector<int> years, std::vector
 
 /*
   db.sessions.aggregate([ 
-    { $match: { year: 2021, month: 7, sport_type_id: 1 } }, 
-    { $addFields: { hour: { $hour: "$start_time" } } }, 
-    { $group: { _id: "$hour", cnt: { $sum: 1 } } } 
+    { $match: { year: { $in: [2021] }, sport_type_id: { $in: [1] } } }, 
+    { $addFields: { hour: { $hour: { date: "$start_time", timezone: "Europe/Vienna" } } } }, 
+    { $group: { _id: "$hour", count: { $sum: 1 } } },
+    { $sort: { _id: 1 } }
   ])
 */
 void MongoDB::Statistics::aggregate_hour_of_day(std::vector<int> years, std::vector<int> sport_type_ids) {
