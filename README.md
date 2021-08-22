@@ -40,6 +40,9 @@ exported recently and had that data in my hands when starting this.
 
 ## Next ideas
 
+* Multithreading (e.g. insert / parsing)
+* Configuration via config file (db name / host,..)
+* Index for text + use this when searching
 * Edit sessions
 
 ## Setup
