@@ -18,8 +18,13 @@ namespace MongoDB {
   private:
 
     mongocxx::collection collection();
+    mongocxx::pool::entry client;
 
   public:
+
+    Sessions() : client( MongoConnection::connection()->client() ) {
+    }
+
     void insert(Models::Session session);
 
     bool find(std::string id, Models::Session* session);

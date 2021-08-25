@@ -8,6 +8,7 @@
 
 #include "../models/weight.hpp"    
 #include "../models/session.hpp"
+#include "../models/distance_bucket.hpp"
 #include "base.hpp"
 
 namespace MongoDB {

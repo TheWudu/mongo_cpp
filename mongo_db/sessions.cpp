@@ -35,7 +35,7 @@ using bsoncxx::builder::stream::open_document;
 #include "sessions.hpp"
 
 mongocxx::collection MongoDB::Sessions::collection() {
-  return Base::collection("sessions");
+  return Base::collection(this->client, "sessions");
 }
 
 void MongoDB::Sessions::insert(Models::Session rs) {

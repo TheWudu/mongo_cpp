@@ -35,7 +35,7 @@ using bsoncxx::builder::stream::open_document;
 #include "cities.hpp"
 
 mongocxx::collection MongoDB::Cities::collection() {
-  return Base::collection("cities");
+  return Base::collection(this->client, "cities");
 }
 
 void MongoDB::Cities::insert(Models::City& city) {
@@ -100,15 +100,26 @@ void MongoDB::Cities::create_geo_index() {
   collection().create_index(index.view(), index_options);
 }
 
-bool MongoDB::Cities::find_nearest(double lat, double lng, Models::City* city, uint32_t maxdist) {
-  // > db.cities.find( { location: { $geoNear: { $geometry: { "type": "Point", coordinates: [13.15228499472141265869140625, 47.98088564537465572357177734375] } } } } ).limit(1)
-  // or
-  // db.cities.aggregate([ { $geoNear: { near: { "type": "Point", coordinates: [13.15228499472141265869140625, 47.98088564537465572357177734375] }, spherical: true, distanceField: "calcDistance" } }, { $limit: 1 } ] )
-  
+bool MongoDB::Cities::imported() {
   bsoncxx::document::value equery = document{} << bsoncxx::builder::stream::finalize; 
+
   if(collection().count_documents(equery.view()) == 0) {
     return false;
   }
+  else {
+    return true;
+  }
+}
+
+bool MongoDB::Cities::find_nearest(double lat, double lng, Models::City* city, uint32_t maxdist) {
+  if(!imported()) {
+    return false;
+  }
+
+  // > db.cities.find( { location: { $geoNear: { $geometry: { "type": "Point", coordinates: [13.15228499472141265869140625, 47.98088564537465572357177734375] } } } } ).limit(1)
+  // or
+  // db.cities.aggregate([ { $geoNear: { near: { "type": "Point", coordinates: [13.15228499472141265869140625, 47.98088564537465572357177734375] }, spherical: true, distanceField: "calcDistance" } }, { $limit: 1 } ] )
+
   mongocxx::options::find opts;
   opts.limit( 1 );  
 
@@ -128,8 +139,6 @@ bool MongoDB::Cities::find_nearest(double lat, double lng, Models::City* city, u
   
   bsoncxx::stdx::optional<bsoncxx::document::value> result = collection().find_one(query.view(), opts);
 
-  //std::cout << bsoncxx::to_json(result->view()) << std::endl;
-  
   if(!result) { 
     return false;
   }

@@ -38,6 +38,10 @@ mongocxx::collection MongoDB::Base::collection(std::string name) {
   MongoConnection* mc = MongoConnection::connection();
   return mc->collection(name);
 }
+    
+mongocxx::collection MongoDB::Base::collection(mongocxx::pool::entry& c, std::string name) {
+  return (*c)["test"][name];
+}
 
 void MongoDB::Base::print_collection(std::string name) {
   mongocxx::cursor cursor = collection(name).find({});

@@ -32,7 +32,7 @@ muh:
 all: checkdirs run
 
 run: $(OBJ)
-	$(LD) $^ $(CFLAGS) $(MONGOFLAGS) -lboost_date_time -o $@
+	$(LD) $^ $(CFLAGS) $(MONGOFLAGS) -pthread -lboost_date_time -o $@
 
 checkdirs: $(BUILD_DIR)
 

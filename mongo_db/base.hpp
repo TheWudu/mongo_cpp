@@ -20,6 +20,7 @@ namespace MongoDB {
     static bsoncxx::builder::basic::array vector_to_array(std::vector<T> vec);
     
     mongocxx::collection collection(std::string name);
+    mongocxx::collection collection(mongocxx::pool::entry& c, std::string name);
 
     static std::string new_object_id();
 

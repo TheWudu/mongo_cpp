@@ -1,32 +1,32 @@
 #pragma once
 
+#include <iostream>
+#include <mongocxx/pool.hpp>
 #include <mongocxx/client.hpp>
 #include <mongocxx/instance.hpp>
 #include <bsoncxx/builder/stream/helpers.hpp>
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/builder/stream/array.hpp>
-
+#include <bsoncxx/stdx/make_unique.hpp>
 
 class MongoConnection {
 
 private:
   mongocxx::instance mongodb_instance{}; // This should be done only once.
-  mongocxx::client client;
-  mongocxx::database db; 
 
   MongoConnection() {
-    mongocxx::uri uri("mongodb://localhost:27017");
-    client = mongocxx::client(uri);
-    db = client["test"];
+    mongocxx::uri uri{"mongodb://localhost:27017"};
+    _pool = bsoncxx::stdx::make_unique<mongocxx::pool>(std::move(uri));
   };
   
   static MongoConnection* _inst;
   
 public:
+  std::unique_ptr<mongocxx::pool> _pool = nullptr;
+
   static MongoConnection* connection() {
-    if (!_inst)
-      _inst = new MongoConnection ();
-    return _inst;
+    static MongoConnection _inst;
+    return &_inst;
   }
 
   ~MongoConnection() {
@@ -34,6 +34,8 @@ public:
       delete MongoConnection::_inst;
     }
   }
+
+  mongocxx::pool::entry client();
 
   mongocxx::collection collection(std::string name);
 

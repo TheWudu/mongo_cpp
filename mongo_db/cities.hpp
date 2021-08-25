@@ -16,7 +16,14 @@ namespace MongoDB {
 
     mongocxx::collection collection();
 
+    mongocxx::pool::entry client;
+
+    bool imported();
+
   public:
+
+    Cities() : client( MongoConnection::connection()->client()) {
+    }
 
     void insert(Models::City& city);
 
