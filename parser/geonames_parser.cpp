@@ -31,7 +31,7 @@ Models::City* GeonamesParser::nearest(double const lat, double const lng) {
   uint32_t min_dist = INT_MAX;
   uint32_t dist = INT_MAX;
   if(cities.size() == 0) {
-std::cout << "nearest: parse file" << std::endl;
+    std::cout << "nearest: parse file" << std::endl;
     parse_default_file();
   }
 
