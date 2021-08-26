@@ -15,7 +15,7 @@ private:
   mongocxx::instance mongodb_instance{}; // This should be done only once.
 
   MongoConnection() {
-    mongocxx::uri uri{"mongodb://localhost:27017"};
+    mongocxx::uri uri{"mongodb://localhost:27017/minPoolSize=10&maxPoolSize=50"};
     _pool = bsoncxx::stdx::make_unique<mongocxx::pool>(std::move(uri));
   };
   

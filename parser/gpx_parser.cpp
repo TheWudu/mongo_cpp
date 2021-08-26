@@ -71,7 +71,7 @@ void GpxParser::calculate_stats() {
     }
 
     auto dur_diff = p->time - pp->time;
-    if(dur_diff >= 20) {
+    if(dur_diff >= 30) {
       pause += dur_diff;
     }
 
