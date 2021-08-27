@@ -23,6 +23,8 @@
 #include "../helper/sport_types.hpp"
 #include "../helper/output.hpp"
 
+#include "config.hpp"
+
 using namespace mongocxx;
 
 using bsoncxx::builder::stream::close_array;
@@ -34,17 +36,15 @@ using bsoncxx::builder::stream::open_document;
 
 #include "base.hpp"
 
-mongocxx::collection MongoDB::Base::collection(std::string name) {
-  MongoConnection* mc = MongoConnection::connection();
-  return mc->collection(name);
-}
-    
 mongocxx::collection MongoDB::Base::collection(mongocxx::pool::entry& c, std::string name) {
-  return (*c)["test"][name];
+  std::string db_name = Config::instance()->mongo_db_name();
+  return (*c)[db_name][name];
 }
 
 void MongoDB::Base::print_collection(std::string name) {
-  mongocxx::cursor cursor = collection(name).find({});
+  MongoConnection* mc = MongoConnection::connection();
+  auto client = mc->client();
+  mongocxx::cursor cursor = collection(client, name).find({});
   for(auto doc : cursor) {
     std::cout << bsoncxx::to_json(doc) << "\n";
   }

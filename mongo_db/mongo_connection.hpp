@@ -9,13 +9,18 @@
 #include <bsoncxx/builder/stream/array.hpp>
 #include <bsoncxx/stdx/make_unique.hpp>
 
+#include "../config.hpp"
+
 class MongoConnection {
 
 private:
   mongocxx::instance mongodb_instance{}; // This should be done only once.
 
   MongoConnection() {
-    mongocxx::uri uri{"mongodb://localhost:27017/minPoolSize=10&maxPoolSize=50"};
+    Config* c = Config::instance();
+    mongocxx::uri uri { c->mongo_connection() };
+
+    std::cout << "Connecting to " << c->mongo_connection() << std::endl;
     _pool = bsoncxx::stdx::make_unique<mongocxx::pool>(std::move(uri));
   };
   

@@ -38,10 +38,10 @@ exported recently and had that data in my hands when starting this.
     * Allow command line usage (ls, show, stats..)
     * Usage output (`./run help` and `./run help <cmd>`)
     * Multithreading (e.g. insert / parsing)
+    * Configuration via config file (db name / host,..): `config.json`
 
 ## Next ideas
 
-* Configuration via config file (db name / host,..)
 * Index for text + use this when searching
 * Edit sessions
 

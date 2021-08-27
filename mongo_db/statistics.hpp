@@ -16,11 +16,16 @@ namespace MongoDB {
 
   public:
 
+    Statistics() : client( MongoConnection::connection()->client() ) {
+    }
+
     void aggregate_stats(std::vector<int> years, 
                          std::vector<int> sport_type_ids, 
                          std::vector<std::string> grouping,
                          std::vector<int> boundaries);
   private:
+    mongocxx::pool::entry client;
+
     static bool weekday_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b);
     static bool year_sort(std::pair<std::string, int>& a, std::pair<std::string, int>& b);
     

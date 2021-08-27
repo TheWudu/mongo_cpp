@@ -1,0 +1,11 @@
+{
+  "mongo": {
+    "host": "localhost",
+    "port": 27017,
+    "options": {
+      "minPoolSize": 10,
+      "maxPoolSize": 50
+    },
+    "db": "mydb"
+  }
+}
