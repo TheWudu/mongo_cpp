@@ -17,7 +17,7 @@ public:
     return &conf;
   }
 
-  std::string mongo_connection(); 
+  std::string mongo_connect_string(); 
   std::string mongo_db_name(); 
 
 private:

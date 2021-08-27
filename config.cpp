@@ -4,7 +4,7 @@
 
 using json = nlohmann::json; 
 
-std::string Config::mongo_connection() {
+std::string Config::mongo_connect_string() {
   if(config_json.contains("mongo")) {
     auto mc = config_json["mongo"];
 
@@ -23,8 +23,6 @@ std::string Config::mongo_connection() {
         }
       }
     }
-    std::string s = ss.str();
-    std::cout << s << std::endl;
     return ss.str();
   }
   else  {

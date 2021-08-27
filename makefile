@@ -10,13 +10,18 @@ BUILD_DIR := $(addprefix build/,$(MODULES))
 SRC       := $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
 OBJ       := $(patsubst %.cpp,build/%.o,$(SRC))
 INCLUDES  := $(addprefix -I,$(SRC_DIR))
+DEPS      := $(OBJ:.o=.d)
 
 vpath %.cpp $(SRC_DIR)
 
-CFLAGS= -g -Wall --std=c++17
+CFLAGS= -g -Wall --std=c++17 -MMD
 MONGOFLAGS=$(shell pkg-config --cflags --libs libmongocxx)
 
+
+-include $(DEPS)
+
 define make-goal
+$1/%.o: %.d
 $1/%.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(MONGOFLAGS) -c $$< -o $$@
 endef
@@ -24,8 +29,9 @@ endef
 .PHONY: all checkdirs clean
 
 muh:
-	@echo "SRC:" $(SRC)
-	@echo "OBJ:" $(OBJ)
+	@echo "SRC: " $(SRC)
+	@echo "OBJ: " $(OBJ)
+	@echo "DEP: " $(DEP)
 	@echo "BUILD_DIR:" $(BUILD_DIR)
 
 

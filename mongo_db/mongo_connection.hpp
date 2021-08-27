@@ -18,9 +18,9 @@ private:
 
   MongoConnection() {
     Config* c = Config::instance();
-    mongocxx::uri uri { c->mongo_connection() };
+    mongocxx::uri uri { c->mongo_connect_string() };
 
-    std::cout << "Connecting to " << c->mongo_connection() << std::endl;
+    std::cout << "Connecting to " << c->mongo_connect_string() << std::endl;
     _pool = bsoncxx::stdx::make_unique<mongocxx::pool>(std::move(uri));
   };
   
