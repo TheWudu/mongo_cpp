@@ -55,8 +55,8 @@ void UseCase::SessionImport::import_threaded() {
     (*t).join();
   }
 
-  //store_to_mongo_threaded();
-  store_to_mongo();
+  store_to_mongo_threaded();
+  //store_to_mongo();
 }
 
 Models::Session* UseCase::SessionImport::parse_gpx_file(std::string filename) {
@@ -256,7 +256,7 @@ void UseCase::SessionImport::store_to_mongo_threaded() {
   int icnt = 0;
   int fcnt = 0;
 
-  std::cout << "Storing to mongo_db ... " 
+  std::cout << "Storing to mongo_db (threaded)... " 
     << "checking " << data.size() << " sessions" 
     << std::endl << std::flush;
 
