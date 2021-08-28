@@ -19,8 +19,12 @@ namespace MongoDB {
   private:
 
     mongocxx::collection collection();
+    mongocxx::pool::entry client;
 
   public:
+
+    Weights() : client( MongoConnection::connection()->client()) {
+    }
     
     void insert(Models::Weight weight);
 

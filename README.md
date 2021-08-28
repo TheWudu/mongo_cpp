@@ -44,6 +44,8 @@ exported recently and had that data in my hands when starting this.
 
 * Index for text + use this when searching
 * Edit sessions
+* Make pause detection threshold configurable
+* Make data paths configurable
 
 ## Setup
 
@@ -127,9 +129,8 @@ any specific patterns or rules. Currently i have the following folders:
 * `helper`, for helper classes, like TimeConverter
 * `models`, for the data classes
 * `use_case`, for the various use-cases i want to provider (RunSessionImport, WeightImport,...)
-
-If i add more and more stuff to mongo_db class, I maybe will split it up in multiple mongo classes,
-and move them into some "repository" folder or so, let's see.
+* `mongo_db`, mongo related classes, e.g. connection or sessions and cities repositories.
+* `parser`, various parser classes, e.g. json, gpx,..
 
 ## Questions 
 
