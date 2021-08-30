@@ -5,6 +5,7 @@
 #include <climits>
 
 #include "hgt_reader.hpp"
+#include "config.hpp"
 
 
 double HgtReader::elevation(double lat, double lng) {
@@ -127,7 +128,7 @@ int32_t HgtReader::from_lat_lng(double lat, double lng) {
 int32_t HgtReader::from_file(std::string const filename, uint32_t position) {
   int32_t elevation = UNKNOWN_ELEVATION;
 
-  std::string path { "data/srtm3/" };
+  std::string path { Config::instance()->srtm3_folder() };
   std::string filepath = path + filename;
   uint8_t buffer[10] = { 0x00 };
 

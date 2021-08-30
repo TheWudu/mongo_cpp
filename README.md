@@ -45,7 +45,6 @@ exported recently and had that data in my hands when starting this.
 * Index for text + use this when searching
 * Edit sessions
 * Make pause detection threshold configurable
-* Make data paths configurable
 
 ## Setup
 

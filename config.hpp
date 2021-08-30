@@ -19,6 +19,12 @@ public:
 
   std::string mongo_connect_string(); 
   std::string mongo_db_name(); 
+  std::string gpx_folder();
+  std::string runtastic_folder();
+  std::string weight_folder();
+  std::string garmin_file();
+  std::string cities_file();
+  std::string srtm3_folder();
 
 private:
   
@@ -27,6 +33,8 @@ private:
   Config() {
     read_config();
   }
+
+  std::string dig(std::string const attrs[]);
 
   void read_config() {
     std::string filename { "config.json" };

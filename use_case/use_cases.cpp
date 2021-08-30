@@ -31,7 +31,7 @@ void import_cities(std::map<std::string, std::string> const args) {
     filename = args.at("-file");
   }
   catch (std::out_of_range&) {
-    filename = "data/cities1000.txt";
+    filename = Config::instance()->cities_file();
   }
   geo->parse_file(filename);
   geo->store_to_mongo();

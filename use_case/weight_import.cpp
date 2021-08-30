@@ -1,5 +1,6 @@
 #include "weight_import.hpp"
 
+#include "../config.hpp"
 #include "../ext/json.hpp"
 #include "../mongo_db/weights.hpp"
 #include "../helper/file_list.hpp"
@@ -19,7 +20,7 @@ void UseCase::WeightImport::import() {
 }
 
 void UseCase::WeightImport::read_files() {
-  FileList file_list = FileList("data/Weight");
+  FileList file_list = FileList( Config::instance()->weight_folder() );
 
   std::vector<std::string> files = file_list.files();
 

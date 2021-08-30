@@ -8,7 +8,7 @@
 
 #include "session_import.hpp"
 
-
+#include "../config.hpp"
 #include "../ext/json.hpp"
 #include "../mongo_db/sessions.hpp"
 #include "../helper/file_list.hpp"
@@ -69,7 +69,8 @@ Models::Session* UseCase::SessionImport::parse_gpx_file(std::string filename) {
 }
 
 void UseCase::SessionImport::read_gpx_files() {
-  FileList file_list = FileList("data/gpx");
+  std::string folder = Config::instance()->gpx_folder();
+  FileList file_list = FileList(folder);
 
   std::vector<std::string> files = file_list.files();
 
@@ -88,7 +89,7 @@ void UseCase::SessionImport::read_gpx_files() {
 }
 
 void UseCase::SessionImport::read_gpx_files_threaded() {
-  FileList file_list = FileList("data/gpx");
+  FileList file_list = FileList( Config::instance()->gpx_folder() );
 
   std::vector<std::string> files = file_list.files();
 
@@ -116,7 +117,7 @@ void UseCase::SessionImport::read_garmin_csv() {
   std::vector<std::string> strs;
   int cnt = 0;
 
-  std::ifstream filestream("data/garmin_activities.csv");
+  std::ifstream filestream(Config::instance()->garmin_file());
 
   while (getline (filestream, line)) {
     boost::split(strs, line, boost::is_any_of(","));
@@ -186,7 +187,7 @@ Models::Session* UseCase::SessionImport::read_runtastic_file(std::string filenam
 }
 
 void UseCase::SessionImport::read_runtastic_files() {
-  FileList file_list = FileList("data/Sport-sessions");
+  FileList file_list = FileList(Config::instance()->runtastic_folder());
 
   std::vector<std::string> files = file_list.files();
 
@@ -202,7 +203,7 @@ void UseCase::SessionImport::read_runtastic_files() {
 }
 
 void UseCase::SessionImport::read_runtastic_files_threaded() {
-  FileList file_list = FileList("data/Sport-sessions");
+  FileList file_list = FileList(Config::instance()->runtastic_folder());
 
   std::vector<std::string> files = file_list.files();
 

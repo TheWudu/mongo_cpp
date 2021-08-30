@@ -47,7 +47,7 @@ Models::City* GeonamesParser::nearest(double const lat, double const lng) {
 }
 
 void GeonamesParser::parse_default_file() {
-  std::string filename { "data/cities1000.txt" };
+  std::string filename { Config::instance()->cities_file() };
   parse_file(filename);
 }
 
