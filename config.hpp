@@ -4,6 +4,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <map>
+
 #include "ext/json.hpp"
 
 using json = nlohmann::json; 
@@ -29,12 +31,16 @@ public:
 private:
   
   json config_json; 
+  std::map<std::string, std::string> memoized;
     
   Config() {
     read_config();
   }
 
   std::string dig(std::string const attrs[]);
+  std::string get(std::string key, std::string default_value, std::string const attrs[]);
+  bool contains(std::string key);
+  void memoize(std::string key, std::string value);
 
   void read_config() {
     std::string filename { "config.json" };
