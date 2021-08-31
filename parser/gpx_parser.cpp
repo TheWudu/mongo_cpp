@@ -58,6 +58,7 @@ void GpxParser::calculate_stats() {
   time_t end_time   = data.back()->time;
   uint32_t duration = (end_time - start_time) * 1000;
   uint32_t pause    = 0;
+  uint32_t pause_threshold = Config::instance()->pause_threshold();
 
   GpxPoint* pp = (*data.begin());
   
@@ -71,7 +72,7 @@ void GpxParser::calculate_stats() {
     }
 
     auto dur_diff = p->time - pp->time;
-    if(dur_diff >= 30) {
+    if(dur_diff >= pause_threshold) {
       pause += dur_diff;
     }
 

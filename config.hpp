@@ -27,6 +27,7 @@ public:
   std::string garmin_file();
   std::string cities_file();
   std::string srtm3_folder();
+  std::uint32_t pause_threshold();
 
 private:
   

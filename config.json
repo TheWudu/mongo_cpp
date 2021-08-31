@@ -9,11 +9,12 @@
     "db": "mydb"
   },
   "import": {
-    "gpx":       "./data/gpx",
-    "runtastic": "./data/Sport-sessions",
-    "garmin":    "./data/garmin_activities.csv",
-    "weight":    "./data/Weight",
-    "cities":    "./data/cities1000.txt",
-    "srtm3":     "./data/srtm3/"
+    "gpx":             "./data/gpx",
+    "runtastic":       "./data/Sport-sessions",
+    "garmin":          "./data/garmin_activities.csv",
+    "weight":          "./data/Weight",
+    "cities":          "./data/cities1000.txt",
+    "srtm3":           "./data/srtm3/",
+    "pause_threshold": "30"
   }
 }

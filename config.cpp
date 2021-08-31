@@ -12,7 +12,6 @@ std::string Config::get(std::string key, std::string default_value, std::string 
 
   std::string value; 
   try {
-    std::cout << "Dig: " << key << std::endl;
     value = dig(attrs);
   }
   catch (...) {
@@ -131,3 +130,11 @@ std::string Config::srtm3_folder() {
   return get("srtm3_folder", default_srtm3_folder, attrs);
 }
 
+uint32_t Config::pause_threshold() {
+  std::string default_pause_threshold { "30" };
+
+  std::string attrs[] = { "import", "pause_threshold" };
+  std::string value = get("pause_threshold", default_pause_threshold, attrs);
+
+  return std::stoi(value);
+}
