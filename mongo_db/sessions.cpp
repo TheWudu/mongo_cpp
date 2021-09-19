@@ -48,6 +48,7 @@ void MongoDB::Sessions::insert(Models::Session rs) {
     << "start_time" << time_t_to_b_date(rs.start_time)
     << "end_time" << time_t_to_b_date(rs.end_time)
     << "start_time_timezone_offset" << rs.start_time_timezone_offset
+    << "timezone" << rs.timezone
     << "distance" << rs.distance
     << "duration" << rs.duration
     << "pause" << rs.pause
@@ -118,6 +119,7 @@ void MongoDB::Sessions::build_session(bsoncxx::v_noabi::document::view data, Mod
   ms = (data["end_time"].get_date().value).count();
   session->end_time       =  ms / 1000;
   session->start_time_timezone_offset = data["start_time_timezone_offset"].get_int32().value;
+  session->timezone       = data["timezone"].get_utf8().value.to_string();
   session->distance       = data["distance"].get_int32().value;
   session->duration       = data["duration"].get_int32().value;
   if(data["pause"]) {

@@ -11,6 +11,7 @@ namespace Models {
     time_t      start_time;
     time_t      end_time;
     int32_t     start_time_timezone_offset;
+    std::string timezone;
     int32_t     distance;
     int32_t     duration;
     int32_t     pause;

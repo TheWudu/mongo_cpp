@@ -114,6 +114,7 @@ Models::Session* GpxParser::build_model() {
   session->elevation_gain = std::round(this->elevation_gain);
   session->elevation_loss = std::round(this->elevation_loss);
   session->start_time_timezone_offset = Helper::TimeConverter::local_timezone_offset(this->start_time) * 1000;
+  session->timezone       = timezone;
   session->start_time     = this->start_time;
   session->end_time       = this->end_time;
   session->notes          = this->name; 

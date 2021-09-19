@@ -14,6 +14,7 @@
 #include "../helper/file_list.hpp"
 #include "../parser/json_parser.hpp"
 #include "../parser/gpx_parser.hpp"
+#include "../parser/geonames_parser.hpp"
 #include "../helper/time_converter.hpp"
 #include "../helper/sport_types.hpp"
 
@@ -118,6 +119,7 @@ void UseCase::SessionImport::read_garmin_csv() {
   int cnt = 0;
 
   std::ifstream filestream(Config::instance()->garmin_file());
+  std::string timezone = Helper::TimeConverter::get_timezone();
 
   while (getline (filestream, line)) {
     boost::split(strs, line, boost::is_any_of(","));
@@ -146,7 +148,7 @@ void UseCase::SessionImport::read_garmin_csv() {
       rs->start_time    -= rs->start_time_timezone_offset;
       rs->end_time       = rs->start_time + rs->duration / 1000;
       rs->notes          = strings[3]; 
-
+      rs->timezone       = timezone;
       cnt++;
 
       this->data.push_back(rs);
@@ -159,8 +161,17 @@ void UseCase::SessionImport::read_garmin_csv() {
 
 Models::Session* UseCase::SessionImport::read_runtastic_file(std::string filename) {
   JsonParser json_parser = JsonParser(filename);
+  std::string timezone;
   
   json json_data = json_parser.get_data();
+  if(json_data["latitude"] != nullptr) {
+    double latitude  = json_data["latitude"];
+    double longitude = json_data["longitude"];
+    timezone = GeonamesParser::instance()->timezone_for(latitude, longitude);
+  }
+  else {
+    timezone = Helper::TimeConverter::get_timezone();
+  }
 
   Models::Session* rs = new Models::Session;
   rs->id          = json_data["id"];
@@ -176,6 +187,7 @@ Models::Session* UseCase::SessionImport::read_runtastic_file(std::string filenam
   int64_t start_timestamp       = json_data["start_time"];
   int64_t end_timestamp         = json_data["end_time"];
   rs->start_time_timezone_offset = json_data["start_time_timezone_offset"];
+  rs->timezone      = timezone;
   rs->start_time    = start_timestamp / 1000;
   rs->end_time      = end_timestamp / 1000;
   rs->sport_type_id = std::stoi((std::string)json_data["sport_type_id"]);
