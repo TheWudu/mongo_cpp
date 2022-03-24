@@ -17,6 +17,8 @@
 #include <bsoncxx/builder/basic/array.hpp>
 #include <bsoncxx/builder/basic/document.hpp>
 #include <bsoncxx/string/to_string.hpp>
+#include <bsoncxx/types.hpp>
+#include <bsoncxx/types/value.hpp>
 #include <mongocxx/exception/exception.hpp>
 #include <mongocxx/exception/logic_error.hpp>
 
@@ -40,7 +42,7 @@ void MongoDB::Statistics::aggregate_stats(std::vector<int> years, std::vector<in
                                  std::vector<std::string> grouping, std::vector<int> boundaries) {
 
   aggregate_basic_statistics(years, sport_type_ids, grouping);
-  aggregate_years(years, sport_type_ids);
+  aggregate_years(years, sport_type_ids, grouping);
   aggregate_weekdays(years, sport_type_ids);
   aggregate_hour_of_day(years, sport_type_ids);
   aggregate_bucket_by_distance(years, sport_type_ids, boundaries);
@@ -119,14 +121,19 @@ void MongoDB::Statistics::aggregate_basic_statistics(std::vector<int> years, std
     { $sort: { _id: 1 } }
   ])
 */
-void MongoDB::Statistics::aggregate_years(std::vector<int> years, std::vector<int> sport_type_ids) {
+void MongoDB::Statistics::aggregate_years(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping) {
   using namespace bsoncxx::builder::basic;
   mongocxx::pipeline p{};
 
   auto matcher = base_matcher(years, sport_type_ids);
+  
+  auto group_by = bsoncxx::builder::stream::document {};
+  for(auto g : grouping) {
+    group_by << g << "$" + g;
+  }
 
   p.match(matcher.view());
-  p.group(make_document(kvp("_id", "$year"), 
+  p.group(make_document(kvp("_id", group_by.view()), 
                         kvp("overall_distance", make_document(kvp("$sum", "$distance"))),
                         kvp("overall_duration", make_document(kvp("$sum", "$duration"))),
                         kvp("overall_elevation_gain", make_document(kvp("$sum", "$elevation_gain"))),
@@ -143,9 +150,9 @@ void MongoDB::Statistics::aggregate_years(std::vector<int> years, std::vector<in
   };
   auto vecs = build_vectors(cursor, attrs);
 
-  Output::print_vector("Distance per year", vecs.at(0), &Output::meters_to_km);
-  Output::print_vector("Duration per year", vecs.at(1), &Helper::TimeConverter::ms_to_min_str);
-  Output::print_vector("Elevation gain per year", vecs.at(2));
+  Output::print_vector("Distance", vecs.at(0), &Output::meters_to_km);
+  Output::print_vector("Duration", vecs.at(1), &Helper::TimeConverter::ms_to_min_str);
+  Output::print_vector("Elevation gain", vecs.at(2));
 }
 
 
@@ -313,12 +320,27 @@ std::vector<std::vector<std::pair<std::string, int>>> MongoDB::Statistics::build
   std::vector<std::vector<std::pair<std::string, int>>> vecs (attrs.size());
   
   for(auto doc : cursor) {
-
     for(uint32_t i = 0; i < attrs.size(); i++) {
 
       int val = doc[attrs[i]].get_int32().value;
 
-      std::string name = std::to_string(doc["_id"].get_int32().value);
+      auto d = doc["_id"].get_document();
+      std::stringstream ss;
+      for (bsoncxx::document::element ele : d.view()) {
+        if( ss.tellp() != 0) {
+          ss << "-";
+        }
+        // element is non owning view of a key-value pair within a document.
+
+        // we can use the key() method to get a string_view of the key.
+        // stdx::string_view field_key{ele.key()};
+        // std::cout << "Got key, key = " << field_key << std::endl;
+        // std::cout << std::to_string(ele.get_int32().value) << std::endl;
+        ss << std::to_string(ele.get_int32().value);
+      }
+      // std::cout << bsoncxx::to_json(d) << std::endl;
+      // std::string name = std::to_string(doc["_id"].get_int32().value);
+      std::string name = ss.str();
       vecs.at(i).push_back(std::make_pair(name, val));
     }
   }

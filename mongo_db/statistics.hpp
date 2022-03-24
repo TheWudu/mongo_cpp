@@ -39,7 +39,7 @@ namespace MongoDB {
     void aggregate_basic_statistics(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping);
     void aggregate_weekdays(std::vector<int> years, std::vector<int> sport_type_ids);
     void aggregate_hour_of_day(std::vector<int> years, std::vector<int> sport_type_ids);
-    void aggregate_years(std::vector<int> years, std::vector<int> sport_type_ids);
+    void aggregate_years(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<std::string> grouping);
 
     void aggregate_bucket_by_distance(std::vector<int> years, std::vector<int> sport_type_ids, std::vector<int> boundaries);
   };
