@@ -187,6 +187,7 @@ void MongoDB::Statistics::aggregate_weekdays(std::vector<int> years, std::vector
 /*
   db.sessions.aggregate([ 
     { $match: { year: { $in: [2021] }, sport_type_id: { $in: [1] } } }, 
+    { $addFields: { timezone: { $ifNull: [ "$timezone", "UTC" ] } } }
     { $addFields: { hour: { $hour: { date: "$start_time", timezone: "$timezone" } } } }, 
     { $group: { _id: "$hour", count: { $sum: 1 } } },
     { $sort: { _id: 1 } }
@@ -200,6 +201,10 @@ void MongoDB::Statistics::aggregate_hour_of_day(std::vector<int> years, std::vec
   auto matcher = base_matcher(years, sport_type_ids); 
 
   p.match(matcher.view());
+  p.add_fields(make_document(kvp("timezone", 
+    make_document(kvp("$ifNull", 
+      make_array("$timezone", "UTC"))))
+    ));
   p.add_fields(make_document(kvp("hour", 
     make_document(kvp("$hour", 
       make_document(kvp("date", "$start_time"),kvp("timezone", "$timezone"))))
