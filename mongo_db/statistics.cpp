@@ -299,6 +299,7 @@ std::vector<DistanceBucket> MongoDB::Statistics::build_distance_buckets_vector(m
 std::vector<std::pair<std::string, int>> MongoDB::Statistics::build_hour_vector(mongocxx::v_noabi::cursor& cursor) {
   std::vector<std::pair<std::string, int>> hourvec;
   for(auto doc : cursor) {
+    // std::cout << bsoncxx::to_json(doc) << std::endl;
     int val = doc["count"].get_int32().value;
     int hour = doc["_id"].get_int32().value;
 
