@@ -184,6 +184,10 @@ Models::Session* UseCase::SessionImport::read_runtastic_file(std::string filenam
     rs->elevation_gain = json_data["elevation_gain"];
     rs->elevation_loss = json_data["elevation_loss"];
   }
+  else {
+    rs->elevation_gain = 0;
+    rs->elevation_loss = 0;
+  }
   int64_t start_timestamp       = json_data["start_time"];
   int64_t end_timestamp         = json_data["end_time"];
   rs->start_time_timezone_offset = json_data["start_time_timezone_offset"];
